@@ -1,58 +1,37 @@
+# Production ready serverless
 
-# Welcome to your CDK Python project!
+Coding along while following the 
+[Production ready serverless](https://school.theburningmonk.com/courses/production-ready-serverless-aug-2024-cdk)
+course.
 
-This is a blank project for CDK development with Python.
+# Overview
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+* CDK deployment: [cdk/app.py](cdk/app.py)
+* `/restaurants`: 
+  * internal API listing restaurants from DynamoDB,
+  * implemented as a lambda behind an API Gateway
+  * protected by IAM
+* `/` : 
+  * public HTML page 
+  * served by a lambda behind an API Gateway
+  * which queries data from `/restaurants`, signing requests with sigv4.  
 
-This project is set up like a standard Python project.  The initialization
-process also creates a virtualenv within this project, stored under the `.venv`
-directory.  To create the virtualenv it assumes that there is a `python3`
-(or `python` for Windows) executable in your path with access to the `venv`
-package. If for any reason the automatic creation of the virtualenv fails,
-you can create the virtualenv manually.
+# How to use
 
-To manually create a virtualenv on MacOS and Linux:
+The `STAGE_NAME` env variable is used to prefix the stack and API names
 
-```
-$ python3 -m venv .venv
-```
+Build and deploy:
 
-After the init process completes and the virtualenv is created, you can use the following
-step to activate your virtualenv.
-
-```
-$ source .venv/bin/activate
-```
-
-If you are a Windows platform, you would activate the virtualenv like this:
-
-```
-% .venv\Scripts\activate.bat
+```sh
+STAGE_NAME=feature-foo cdk deploy --all
+STAGE_NAME=feature-foo cdk diff
+...
 ```
 
-Once the virtualenv is activated, you can install the required dependencies.
+Seed the DB:
 
-```
-$ pip install -r requirements.txt
-```
-
-At this point you can now synthesize the CloudFormation template for this code.
-
-```
-$ cdk synth
+```shell
+python seed/seed_restaurants.py --db-stack-name DB-svend
 ```
 
-To add additional dependencies, for example other CDK libraries, just add
-them to your `setup.py` file and rerun the `pip install -r requirements.txt`
-command.
-
-## Useful commands
-
- * `cdk ls`          list all stacks in the app
- * `cdk synth`       emits the synthesized CloudFormation template
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk docs`        open CDK documentation
-
-Enjoy!
+See stack output for the app URL.
