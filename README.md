@@ -6,19 +6,21 @@ course.
 
 # Overview
 
+Status: Week 1 completed
+
 * CDK deployment: [cdk/app.py](cdk/app.py)
 * API (lambdas, behind a REST API on the API Gateway)
   * `/restaurants`: 
     * internal API listing all restaurants from DynamoDB
     * protected by IAM
   * `/restaurants/search`: 
-    * search by attribute in DynamoDB (scans.. :( ))
+    * search by attribute in DynamoDB 
     * protected by Cognito: simply checking if the user has a JWT token for the configured Cognito user pool
   * `/` : 
     * public HTML page 
-    * which queries data from `/restaurants`, signing requests with sigv4.
-    * is allowing to create/signin in users in the Cognito user pool, using SRP.
-    * uses the Cognito JWT token to send requests to `/restaurants/search`
+    * queries data from `/restaurants` on server side, signing requests with sigv4
+    * is allowing users to create/signin in the Cognito user pool, using SRP
+    * uses the Cognito JWT token to send requests from the browser to `/restaurants/search`
 
 # Dev setup
 

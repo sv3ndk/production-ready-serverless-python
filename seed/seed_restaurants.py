@@ -19,6 +19,7 @@ def restaurant_table_name():
 
     raise ValueError("RestaurantsTableName not found in stack outputs")
 
+
 restaurants = [
     {
         "name": "Fangtasia",
