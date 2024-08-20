@@ -25,6 +25,7 @@ ApiStack(
     stage_name=stage_name,
     restaurants_table=db_stack.table,
     cognito_user_pool=cognito_stack.user_pool,
+    cognito_web_user_pool_client=cognito_stack.web_user_pool_client,
     )
 
 app.synth()

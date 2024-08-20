@@ -10,6 +10,14 @@ RESTAURANTS_API_URL = os.getenv("RESTAURANTS_API_URL")
 if not RESTAURANTS_API_URL:
     raise ValueError("RESTAURANTS_API_URL environment variable is not set")
 
+COGNITO_USER_POOL_ID = os.getenv("COGNITO_USER_POOL_ID")
+if not COGNITO_USER_POOL_ID:
+    raise ValueError("COGNITO_USER_POOL_ID environment variable is not set")
+
+COGNITO_CLIENT_ID = os.getenv("COGNITO_CLIENT_ID")
+if not COGNITO_CLIENT_ID:
+    raise ValueError("COGNITO_CLIENT_ID environment variable is not set")
+
 index_html_template = open("index.html").read()
 
 aws_region = boto3.session.Session().region_name
@@ -34,7 +42,11 @@ def handler(event, context):
     template = jinja2.Template(source=index_html_template)
     index_html = template.render(
         dayOfWeek=day_of_week,
-        restaurants=restaurants
+        restaurants=restaurants,
+        searchUrl=f"{RESTAURANTS_API_URL}/search",
+        awsRegion=aws_region,
+        cognitoUserPoolId=COGNITO_USER_POOL_ID,
+        cognitoClientId=COGNITO_CLIENT_ID
     )
 
     return {

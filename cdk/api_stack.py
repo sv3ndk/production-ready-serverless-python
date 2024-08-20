@@ -6,7 +6,7 @@ from aws_cdk import (
     aws_lambda_python_alpha,
     aws_cognito
 )
-from aws_cdk.aws_apigateway import StageOptions, Authorizer
+from aws_cdk.aws_apigateway import StageOptions
 from aws_cdk.aws_dynamodb import Table
 from aws_cdk.aws_iam import PolicyStatement, Effect
 
@@ -22,6 +22,7 @@ class ApiStack(Stack):
             stage_name: str,
             restaurants_table: Table,
             cognito_user_pool: aws_cognito.UserPool,
+            cognito_web_user_pool_client: aws_cognito.UserPoolClient,
             **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
@@ -94,7 +95,9 @@ class ApiStack(Stack):
             runtime=aws_lambda.Runtime.PYTHON_3_12,
             environment={
                 "TABLE_NAME": restaurants_table.table_name,
-                "RESTAURANTS_API_URL": Fn.sub(f"https://${{{api_logical_id}}}.execute-api.${{AWS::Region}}.amazonaws.com/{stage_name}/restaurants")
+                "RESTAURANTS_API_URL": Fn.sub(f"https://${{{api_logical_id}}}.execute-api.${{AWS::Region}}.amazonaws.com/{stage_name}/restaurants"),
+                "COGNITO_USER_POOL_ID": cognito_user_pool.user_pool_id,
+                "COGNITO_CLIENT_ID": cognito_web_user_pool_client.user_pool_client_id
             }
         )
         get_index_fn.role.add_to_principal_policy(

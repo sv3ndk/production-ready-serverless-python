@@ -51,7 +51,6 @@ class CognitoStack(Stack):
             id="web_user_pool_client",
             user_pool=self.user_pool,
             auth_flows=aws_cognito.AuthFlow(
-                # user_password=True,
                 user_srp=True
             ),
             prevent_user_existence_errors=True
