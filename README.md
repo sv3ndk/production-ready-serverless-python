@@ -19,7 +19,7 @@ Status: Week 1 completed
   * `/` : 
     * public HTML page 
     * queries data from `/restaurants` on server side, signing requests with sigv4
-    * is allowing users to create/signin in the Cognito user pool, using SRP
+    * is allowing users to create/sign in the Cognito user pool, using SRP
     * uses the Cognito JWT token to send requests from the browser to `/restaurants/search`
 
 # Dev setup
@@ -28,6 +28,15 @@ Status: Week 1 completed
 python3.12 -m venv .venv-box
 source .venv-box/bin/activate
 pip install -r cdk/requirements.txt
+```
+
+# Launch integration tests
+
+```sh
+# TODO: we should use 2 venv here
+pip install -r tests/integration/requirements.txt
+
+pytest tests/integration -s -v
 ```
 
 # How to use
@@ -49,3 +58,6 @@ python seed/seed_restaurants.py --db-stack-name DB-svend
 ```
 
 See stack output for the app URL, then open it in a browser.
+
+
+<img id="logo" src="https://d2qt42rcwzspd6.cloudfront.net/manning/big-mouth.png">

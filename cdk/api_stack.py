@@ -95,6 +95,7 @@ class ApiStack(Stack):
             runtime=aws_lambda.Runtime.PYTHON_3_12,
             environment={
                 "TABLE_NAME": restaurants_table.table_name,
+                # we can't use the API Gateway resource here to know the URL because it would create a circular dependency
                 "RESTAURANTS_API_URL": Fn.sub(f"https://${{{api_logical_id}}}.execute-api.${{AWS::Region}}.amazonaws.com/{stage_name}/restaurants"),
                 "COGNITO_USER_POOL_ID": cognito_user_pool.user_pool_id,
                 "COGNITO_CLIENT_ID": cognito_web_user_pool_client.user_pool_client_id

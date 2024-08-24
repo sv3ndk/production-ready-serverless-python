@@ -1,6 +1,7 @@
 from aws_cdk import (
     Stack,
-    aws_dynamodb, CfnOutput
+    aws_dynamodb,
+    CfnOutput
 )
 from constructs import Construct
 
