@@ -4,7 +4,7 @@ from aws_cdk import (
     aws_lambda,
     aws_apigateway,
     aws_lambda_python_alpha,
-    aws_cognito
+    aws_cognito, CfnOutput
 )
 from aws_cdk.aws_apigateway import StageOptions
 from aws_cdk.aws_dynamodb import Table
@@ -35,6 +35,9 @@ class ApiStack(Stack):
         )
 
         api_logical_id = self.get_logical_id(api.node.default_child)
+
+        def api_url(path: str = "") -> str:
+            return Fn.sub(f"https://${{{api_logical_id}}}.execute-api.${{AWS::Region}}.amazonaws.com/{stage_name}/{path}")
 
         # GET /restaurants
         # internal API: protected by IAM
@@ -94,9 +97,9 @@ class ApiStack(Stack):
             handler="handler",
             runtime=aws_lambda.Runtime.PYTHON_3_12,
             environment={
-                "TABLE_NAME": restaurants_table.table_name,
                 # we can't use the API Gateway resource here to know the URL because it would create a circular dependency
-                "RESTAURANTS_API_URL": Fn.sub(f"https://${{{api_logical_id}}}.execute-api.${{AWS::Region}}.amazonaws.com/{stage_name}/restaurants"),
+                # "RESTAURANTS_API_URL": Fn.sub(f"https://${{{api_logical_id}}}.execute-api.${{AWS::Region}}.amazonaws.com/{stage_name}/restaurants"),
+                "RESTAURANTS_API_URL": api_url("restaurants"),
                 "COGNITO_USER_POOL_ID": cognito_user_pool.user_pool_id,
                 "COGNITO_CLIENT_ID": cognito_web_user_pool_client.user_pool_client_id
             }
@@ -113,4 +116,11 @@ class ApiStack(Stack):
         api.root.add_method(
             "GET",
             aws_apigateway.LambdaIntegration(get_index_fn)
+        )
+
+        CfnOutput(
+            scope=self,
+            id="root_url",
+            key="RootUrl",
+            value=api_url()
         )

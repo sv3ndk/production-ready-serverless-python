@@ -1,6 +1,6 @@
 from aws_cdk import (
     Stack,
-    aws_cognito
+    aws_cognito, CfnOutput
 )
 from aws_cdk.aws_cognito import StandardAttribute
 from constructs import Construct
@@ -44,6 +44,12 @@ class CognitoStack(Stack):
                 )
             )
         )
+        CfnOutput(
+            scope=self,
+            id="user_pool_id",
+            key="UserPoolId",
+            value=self.user_pool.user_pool_id
+        )
 
         # used by the web app
         self.web_user_pool_client = aws_cognito.UserPoolClient(
@@ -55,6 +61,12 @@ class CognitoStack(Stack):
             ),
             prevent_user_existence_errors=True
         )
+        CfnOutput(
+            scope=self,
+            id="web_user_pool_client_id",
+            key="WebUserPoolClientId",
+            value=self.web_user_pool_client.user_pool_client_id
+        )
 
         self.server_user_pool_client = aws_cognito.UserPoolClient(
             scope=self,
@@ -64,4 +76,10 @@ class CognitoStack(Stack):
                 admin_user_password=True
             ),
             prevent_user_existence_errors=True
+        )
+        CfnOutput(
+            scope=self,
+            id="server_user_pool_client_id",
+            key="ServerUserPoolClientId",
+            value=self.server_user_pool_client.user_pool_client_id
         )

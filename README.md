@@ -21,6 +21,9 @@ Status: Week 1 completed
     * queries data from `/restaurants` on server side, signing requests with sigv4
     * is allowing users to create/sign in the Cognito user pool, using SRP
     * uses the Cognito JWT token to send requests from the browser to `/restaurants/search`
+* Test:
+  * BDD style [integration tests](tests/integration/features) using pytest-bdd
+
 
 # Dev setup
 
@@ -30,18 +33,9 @@ source .venv-box/bin/activate
 pip install -r cdk/requirements.txt
 ```
 
-# Launch integration tests
-
-```sh
-# TODO: we should use 2 venv here
-pip install -r tests/integration/requirements.txt
-
-pytest tests/integration -s -v
-```
-
 # How to use
 
-The `STAGE_NAME` env variable is used to prefix the stack and API names
+The `STAGE_NAME` env variable is used to prefix the stack and API names.
 
 Build and deploy:
 
@@ -59,5 +53,19 @@ python seed/seed_restaurants.py --db-stack-name DB-svend
 
 See stack output for the app URL, then open it in a browser.
 
+# Launch integration tests
 
-<img id="logo" src="https://d2qt42rcwzspd6.cloudfront.net/manning/big-mouth.png">
+Integration test are invoking the lambdas handlers directly, relying on resources created in the AWS account
+by the CDK stack. Execution the integration tests requires to be authenticated with AWS. 
+
+The `STAGE_NAME` environment variable is used to retrieve those resources details when running the tests.
+
+Make sure the database is seeded with the script above to match exactly the test expectations (TODO: automate this step).
+
+```sh
+# create a virtualenv with the required dependencies:
+pip install -r functions/get_index/requirements.txt
+pip install -r tests/integration/requirements.txt
+
+STAGE_NAME=feature-foo PYTHONPATH=functions/get_index:functions/get_restaurants:functions/search_restaurants pytest tests/integration -s -v --gherkin-terminal-reporter -v
+```

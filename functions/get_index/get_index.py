@@ -18,7 +18,8 @@ COGNITO_CLIENT_ID = os.getenv("COGNITO_CLIENT_ID")
 if not COGNITO_CLIENT_ID:
     raise ValueError("COGNITO_CLIENT_ID environment variable is not set")
 
-index_html_template = open("index.html").read()
+with open(os.path.join(os.path.dirname(__file__), "index.html")) as f:
+    index_html_template = f.read()
 
 aws_region = boto3.session.Session().region_name
 
@@ -34,9 +35,8 @@ def all_restaurants() -> list[dict]:
     return response.json()
 
 
-def handler(event, context):
+def handler(event, context) -> dict:
     restaurants = all_restaurants()
-    print(f"restaurants: {restaurants}")
     day_of_week = datetime.datetime.today().strftime("%A")
 
     template = jinja2.Template(source=index_html_template)
