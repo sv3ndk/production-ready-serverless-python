@@ -6,9 +6,10 @@ course.
 
 # Overview
 
-Status: Week 1 completed
+Status: Week 2 in-progress
 
 * CDK deployment: [cdk/app.py](cdk/app.py)
+
 * API (lambdas, behind a REST API on the API Gateway)
   * `/restaurants`: 
     * internal API listing all restaurants from DynamoDB
@@ -21,9 +22,9 @@ Status: Week 1 completed
     * queries data from `/restaurants` on server side, signing requests with sigv4
     * is allowing users to create/sign in the Cognito user pool, using SRP
     * uses the Cognito JWT token to send requests from the browser to `/restaurants/search`
-* Test:
-  * BDD style [integration tests](tests/integration/features) using pytest-bdd
 
+* Test: BDD style [integration tests](tests/integration/features) and [end-to-end tests](tests/end-to-end/features) 
+  using pytest-bdd
 
 # Dev setup
 
@@ -53,19 +54,47 @@ python seed/seed_restaurants.py --db-stack-name DB-svend
 
 See stack output for the app URL, then open it in a browser.
 
-# Launch integration tests
+# Tests
 
-Integration test are invoking the lambdas handlers directly, relying on resources created in the AWS account
-by the CDK stack. Execution the integration tests requires to be authenticated with AWS. 
+Both the integration and end-to-end tests require resources to already be present in the AWS account.
+
+The database should also have been seeded with the script above to match exactly the test expectations 
+(TODO: automate this step).
 
 The `STAGE_NAME` environment variable is used to retrieve those resources details when running the tests.
 
-Make sure the database is seeded with the script above to match exactly the test expectations (TODO: automate this step).
+Executing the tests requires to be authenticated with AWS.
+
+Create a virtualenv with the required dependencies
 
 ```sh
-# create a virtualenv with the required dependencies:
 pip install -r functions/get_index/requirements.txt
-pip install -r tests/integration/requirements.txt
+pip install -r tests/requirements.txt
+````
 
-STAGE_NAME=feature-foo PYTHONPATH=functions/get_index:functions/get_restaurants:functions/search_restaurants pytest tests/integration -s -v --gherkin-terminal-reporter -v
+## Integration tests
+
+Integration tests are invoking the lambdas handlers directly, relying on resources present in the AWS account. 
+ 
+```sh
+STAGE_NAME=feature-foo \
+PYTHONPATH=functions/get_index:functions/get_restaurants:functions/search_restaurants \
+  pytest tests/integration \
+  -s \
+  -v \
+  --gherkin-terminal-reporter -v
+```
+
+## End-to-end tests
+
+Integration tests are invoking the REST endpoints exposed via the API-gateway.
+
+Temporary Cognito users are created and deleted during the tests.
+
+```sh
+STAGE_NAME=svend \
+  pytest tests/end-to-end \
+  -s \
+  -v \
+  --gherkin-terminal-reporter -v
 ```
