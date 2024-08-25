@@ -33,8 +33,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: eu-west-1
-          role-to-assume: gha-production-ready-serverless-python
-          account-id: '739786912520'
+          role-to-assume: arn:aws:iam::739786912520:role/gha-production-ready-serverless-python
           role-session-name: GithubActionsSession
 
       - name: install CDK
@@ -47,10 +46,13 @@ jobs:
 
       - name: setup libs
         run: |
-          
           pip install -r cdk/requirements.txt
           pip install -r functions/get_index/requirements.txt
           pip install -r tests/requirements.txt
+
+      - name: seed restaurant DB
+        run: |
+          python seed/seed_restaurants.py
 
       - name: run integration test
         env:
