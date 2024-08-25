@@ -49,7 +49,7 @@ jobs:
 
       - name: deploy stage gha to dev
         run: |
-          ckd bootstrap
+          cdk bootstrap
           cdk destroy --all --force
           cdk deploy --all --require-approval never
 
