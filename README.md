@@ -49,7 +49,7 @@ STAGE_NAME=feature-foo cdk diff
 Seed the DB:
 
 ```shell
-python seed/seed_restaurants.py --db-stack-name DB-svend
+STAGE_NAME=feature-foo python seed/seed_restaurants.py
 ```
 
 See stack output for the app URL, then open it in a browser.

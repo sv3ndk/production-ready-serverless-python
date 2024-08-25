@@ -1,11 +1,8 @@
+import os
 import boto3
-import argparse
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--db-stack-name", required=True)
-
-args = parser.parse_args()
-db_stack_name = args.db_stack_name
+stage_name = os.environ['STAGE_NAME']
+db_stack_name = f"DB-{stage_name}"
 
 cfn_client = boto3.client('cloudformation')
 
@@ -67,6 +64,14 @@ dynamo_resource = boto3.resource('dynamodb')
 table_name = restaurant_table_name()
 restaurant_table_client = dynamo_resource.Table(table_name)
 
+print(f"deleting all items from restaurants table {table_name}")
+response = restaurant_table_client.scan(ConsistentRead=True)
+with restaurant_table_client.batch_writer() as batch:
+    for item in response['Items']:
+        batch.delete_item(Key={'name': item['name']})
+
+print(f"seeding restaurants table {table_name} with {len(restaurants)} items")
 with restaurant_table_client.batch_writer() as batch:
     for restaurant in restaurants:
+        print(f"adding restauran {restaurant['name']}")
         batch.put_item(Item=restaurant)
