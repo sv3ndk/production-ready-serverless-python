@@ -92,7 +92,7 @@ Integration tests are invoking the REST endpoints exposed via the API-gateway.
 Temporary Cognito users are created and deleted during the tests.
 
 ```sh
-STAGE_NAME=svend \
+STAGE_NAME=feature-foo \
   pytest tests/end-to-end \
   -s \
   -v \

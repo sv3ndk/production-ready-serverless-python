@@ -1,0 +1,68 @@
+name: deploy dev
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    # this prevents concurrent builds
+    concurrency: dev-environment
+
+    # The type of runner that the job will run on
+    runs-on: ubuntu-24.04
+
+    # this is required for authenticating to AWS via the OIDC Provider we set up
+    permissions:
+      id-token: write
+      contents: write
+
+    env:
+      STAGE_NAME: gha
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          cache: 'pip'
+          python-version: 3.12
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-1
+          role-to-assume: gha-production-ready-serverless-python
+          role-session-name: GithubActionsSession
+
+      - name: install CDK
+        run: npm install -g aws-cdk
+
+      - name: deploy stage gha to dev
+        run: cdk deploy --all --require-approval never
+
+      # TODO: tox would help here avoid the repetition between the readme and the CI
+
+      - name: setup libs
+        run: |
+          
+          pip install -r cdk/requirements.txt
+          pip install -r functions/get_index/requirements.txt
+          pip install -r tests/requirements.txt
+
+      - name: run integration test
+        env:
+          PYTHONPATH: functions/get_index:functions/get_restaurants:functions/search_restaurants
+        run: |
+          pytest tests/integration \
+          -s \
+          -v \
+          --gherkin-terminal-reporter -v
+
+      - name: run end-to-end tests
+        run: |
+          pytest tests/end-to-end \
+            -s \
+            -v \
+            --gherkin-terminal-reporter -v
