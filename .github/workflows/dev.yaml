@@ -6,7 +6,7 @@ on:
 
 jobs:
   deploy:
-    # this prevents concurrent builds
+    # this prevents concurrent builds since we are deploying to the same environment
     concurrency: dev-environment
 
     # The type of runner that the job will run on
@@ -24,10 +24,17 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: setup python
+        uses: actions/setup-python@v5
         with:
           cache: 'pip'
           python-version: 3.12
+
+      - name: setup python libs
+        run: |
+          pip install -r cdk/requirements.txt
+          pip install -r functions/get_index/requirements.txt
+          pip install -r tests/requirements.txt
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -40,15 +47,11 @@ jobs:
         run: npm install -g aws-cdk
 
       - name: deploy stage gha to dev
-        run: cdk deploy --all --require-approval never
+        run: |
+          cdk destroy --all --force
+          cdk deploy --all --require-approval never
 
       # TODO: tox would help here avoid the repetition between the readme and the CI
-
-      - name: setup libs
-        run: |
-          pip install -r cdk/requirements.txt
-          pip install -r functions/get_index/requirements.txt
-          pip install -r tests/requirements.txt
 
       - name: seed restaurant DB
         run: |
