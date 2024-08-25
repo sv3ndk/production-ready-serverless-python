@@ -9,6 +9,7 @@ jobs:
     # this prevents concurrent builds since we are deploying to the same environment
     concurrency: dev-environment
 
+
     # The type of runner that the job will run on
     runs-on: ubuntu-24.04
 
@@ -48,6 +49,7 @@ jobs:
 
       - name: deploy stage gha to dev
         run: |
+          ckd bootstrap
           cdk destroy --all --force
           cdk deploy --all --require-approval never
 
