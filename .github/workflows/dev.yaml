@@ -34,6 +34,7 @@ jobs:
         with:
           aws-region: eu-west-1
           role-to-assume: gha-production-ready-serverless-python
+          account-id: '739786912520'
           role-session-name: GithubActionsSession
 
       - name: install CDK
