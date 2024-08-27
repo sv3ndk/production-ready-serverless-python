@@ -11,7 +11,7 @@ scenarios("../features/get_restaurants_api_endpoint.feature")
 def get_restaurants(restaurant_table_name: str) -> Callable:
     # re-create the environment variables expected by the Lambda function
     os.environ["TABLE_NAME"] = restaurant_table_name
-    os.environ["RESULT_LIMIT"] = "20"
+    os.environ["POWERTOOLS_SERVICE_NAME"] = "production-ready-serverless"
     import get_restaurants
     return get_restaurants.handler
 

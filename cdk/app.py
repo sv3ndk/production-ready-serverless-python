@@ -23,6 +23,7 @@ cognito_stack = CognitoStack(
 ApiStack(
     app,
     construct_id=f"API-{stage_name}",
+    service_name="production-ready-serverless",
     stage_name=stage_name,
     restaurants_table=db_stack.table,
     cognito_user_pool=cognito_stack.user_pool,

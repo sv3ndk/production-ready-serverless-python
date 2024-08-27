@@ -4,7 +4,7 @@ from aws_cdk import (
     aws_lambda,
     aws_apigateway,
     aws_lambda_python_alpha,
-    aws_cognito, CfnOutput
+    aws_cognito, CfnOutput, Duration
 )
 from aws_cdk.aws_apigateway import StageOptions
 from aws_cdk.aws_dynamodb import Table
@@ -19,6 +19,7 @@ class ApiStack(Stack):
             self,
             scope: Construct,
             construct_id: str,
+            service_name: str,
             stage_name: str,
             restaurants_table: Table,
             cognito_user_pool: aws_cognito.UserPool,
@@ -42,18 +43,30 @@ class ApiStack(Stack):
         # GET /restaurants
         # internal API: protected by IAM
 
-        get_restaurants_fn = aws_lambda.Function(
+        get_restaurants_fn = aws_lambda_python_alpha.PythonFunction(
             scope=self,
             id="get_restaurants",
-            handler="get_restaurants.handler",
+            entry="functions/get_restaurants",
+            index="get_restaurants.py",
+            handler="handler",
+            timeout=Duration.seconds(15),
             runtime=aws_lambda.Runtime.PYTHON_3_12,
-            code=aws_lambda.Code.from_asset("functions/get_restaurants"),
             environment={
+                "POWERTOOLS_SERVICE_NAME": service_name,
+                "STAGE_NAME": stage_name,
                 "TABLE_NAME": restaurants_table.table_name,
-                "RESULT_LIMIT": "10"
             }
         )
         restaurants_table.grant_read_data(get_restaurants_fn)
+        get_restaurants_fn.role.add_to_principal_policy(
+            PolicyStatement(
+                actions=["ssm:GetParameter"],
+                resources=[
+                    Fn.sub(f"arn:aws:ssm:${{AWS::Region}}:${{AWS::AccountId}}:parameter/{service_name}/stage-{stage_name}/get-restaurants/*")
+                ],
+                effect=Effect.ALLOW
+            )
+        )
         restaurants_api = api.root.add_resource('restaurants')
         restaurants_api.add_method(
             http_method='GET',
@@ -64,17 +77,31 @@ class ApiStack(Stack):
         # POST /restaurants/search
         # external API: protected by Cognito
 
-        search_restaurants_fn = aws_lambda.Function(
+        search_restaurants_fn = aws_lambda_python_alpha.PythonFunction(
             scope=self,
             id="search_restaurants",
-            handler="search_restaurants.handler",
+            entry="functions/search_restaurants",
+            index="search_restaurants.py",
+            handler="handler",
+            timeout=Duration.seconds(15),
             runtime=aws_lambda.Runtime.PYTHON_3_12,
-            code=aws_lambda.Code.from_asset("functions/search_restaurants"),
             environment={
+                "POWERTOOLS_SERVICE_NAME": service_name,
+                "STAGE_NAME": stage_name,
                 "TABLE_NAME": restaurants_table.table_name,
-                "RESULT_LIMIT": "10"
-            },
+            }
         )
+        search_restaurants_fn.role.add_to_principal_policy(
+            PolicyStatement(
+                actions=["ssm:GetParameter"],
+                resources=[
+                    # TODO: this could be another parameter
+                    Fn.sub(f"arn:aws:ssm:${{AWS::Region}}:${{AWS::AccountId}}:parameter/{service_name}/stage-{stage_name}/get-restaurants/*")
+                ],
+                effect=Effect.ALLOW
+            )
+        )
+
         restaurants_table.grant_read_data(search_restaurants_fn)
         restaurants_api.add_resource('search').add_method(
             http_method='POST',
@@ -95,8 +122,10 @@ class ApiStack(Stack):
             entry="functions/get_index",
             index="get_index.py",
             handler="handler",
+            timeout=Duration.seconds(15),
             runtime=aws_lambda.Runtime.PYTHON_3_12,
             environment={
+                "POWERTOOLS_SERVICE_NAME": service_name,
                 # we can't use the API Gateway resource here to know the URL because it would create a circular dependency
                 # "RESTAURANTS_API_URL": Fn.sub(f"https://${{{api_logical_id}}}.execute-api.${{AWS::Region}}.amazonaws.com/{stage_name}/restaurants"),
                 "RESTAURANTS_API_URL": api_url("restaurants"),

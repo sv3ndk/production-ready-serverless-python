@@ -13,8 +13,8 @@ def get_get_index_handler(app_restaurant_url: str, cognito_user_pool_id: str, co
     os.environ["RESTAURANTS_API_URL"] = app_restaurant_url
     os.environ["COGNITO_USER_POOL_ID"] = cognito_user_pool_id
     os.environ["COGNITO_CLIENT_ID"] = cognito_web_user_pool_client_id
+    os.environ["POWERTOOLS_SERVICE_NAME"] = "production-ready-serverless"
     import get_index
-    # return get_index.handler({}, {})
     return get_index.handler
 
 @when("I navigate to the main page", target_fixture="index_response")

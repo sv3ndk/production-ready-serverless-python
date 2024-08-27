@@ -25,6 +25,7 @@ Status: Week 2 in-progress
 
 * Test: BDD style [integration tests](tests/integration/features) and [end-to-end tests](tests/end-to-end/features) 
   using pytest-bdd
+* Config obtained from SSM Parameter Store, with a 1 minute TTL
 
 # Dev setup
 

@@ -5,6 +5,10 @@ import os
 import jinja2
 import requests
 from requests_aws4auth import AWS4Auth
+from aws_lambda_powertools.logging import Logger
+
+logger = Logger(log_uncaught_exceptions=True)
+
 
 RESTAURANTS_API_URL = os.getenv("RESTAURANTS_API_URL")
 if not RESTAURANTS_API_URL:
@@ -37,6 +41,7 @@ def all_restaurants() -> list[dict]:
 
 def handler(event, context) -> dict:
     restaurants = all_restaurants()
+    logger.info(f"restaurants: {restaurants}")
     day_of_week = datetime.datetime.today().strftime("%A")
 
     template = jinja2.Template(source=index_html_template)
@@ -48,6 +53,7 @@ def handler(event, context) -> dict:
         cognitoUserPoolId=COGNITO_USER_POOL_ID,
         cognitoClientId=COGNITO_CLIENT_ID
     )
+    logger.info(f"index_html: {index_html}")
 
     return {
         'statusCode': 200,
