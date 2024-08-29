@@ -19,7 +19,8 @@ jobs:
       contents: write
 
     env:
-      STAGE_NAME: gha
+      MATURITY_LEVEL: dev
+      FEATURE_NAME: gha
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
