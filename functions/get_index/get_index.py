@@ -53,7 +53,6 @@ def handler(event, context) -> dict:
         cognitoUserPoolId=COGNITO_USER_POOL_ID,
         cognitoClientId=COGNITO_CLIENT_ID
     )
-    logger.info(f"index_html: {index_html}")
 
     return {
         'statusCode': 200,

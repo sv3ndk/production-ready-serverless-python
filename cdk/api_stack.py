@@ -20,7 +20,8 @@ class ApiStack(Stack):
             scope: Construct,
             construct_id: str,
             service_name: str,
-            stage_name: str,
+            feature_name: str,
+            maturity_level: str,
             restaurants_table: Table,
             cognito_user_pool: aws_cognito.UserPool,
             cognito_web_user_pool_client: aws_cognito.UserPoolClient,
@@ -29,16 +30,22 @@ class ApiStack(Stack):
 
         api = aws_apigateway.RestApi(
             scope=self,
-            id=f"{stage_name}-api",
+            id=f"api{feature_name}",
             deploy_options=StageOptions(
-                stage_name=stage_name
+                stage_name=feature_name
             )
         )
 
         api_logical_id = self.get_logical_id(api.node.default_child)
 
-        def api_url(path: str = "") -> str:
-            return Fn.sub(f"https://${{{api_logical_id}}}.execute-api.${{AWS::Region}}.amazonaws.com/{stage_name}/{path}")
+        def api_url(path: str = "/") -> str:
+            return Fn.sub(f"https://${{{api_logical_id}}}.execute-api.${{AWS::Region}}.amazonaws.com/{feature_name}{path}")
+
+        def ssm_params_path(suffix: str) -> str:
+            """
+            Returns the SSM parameter path for the given suffix.
+            """
+            return Fn.sub(f"arn:aws:ssm:${{AWS::Region}}:${{AWS::AccountId}}:parameter/{service_name}/shared_context/{maturity_level}{suffix}")
 
         # GET /restaurants
         # internal API: protected by IAM
@@ -53,7 +60,7 @@ class ApiStack(Stack):
             runtime=aws_lambda.Runtime.PYTHON_3_12,
             environment={
                 "POWERTOOLS_SERVICE_NAME": service_name,
-                "STAGE_NAME": stage_name,
+                "MATURITY_LEVEL": maturity_level,
                 "TABLE_NAME": restaurants_table.table_name,
             }
         )
@@ -62,7 +69,7 @@ class ApiStack(Stack):
             PolicyStatement(
                 actions=["ssm:GetParameter"],
                 resources=[
-                    Fn.sub(f"arn:aws:ssm:${{AWS::Region}}:${{AWS::AccountId}}:parameter/{service_name}/stage-{stage_name}/get-restaurants/*")
+                    ssm_params_path("/get_restaurants/*")
                 ],
                 effect=Effect.ALLOW
             )
@@ -87,7 +94,7 @@ class ApiStack(Stack):
             runtime=aws_lambda.Runtime.PYTHON_3_12,
             environment={
                 "POWERTOOLS_SERVICE_NAME": service_name,
-                "STAGE_NAME": stage_name,
+                "MATURITY_LEVEL": maturity_level,
                 "TABLE_NAME": restaurants_table.table_name,
             }
         )
@@ -95,8 +102,7 @@ class ApiStack(Stack):
             PolicyStatement(
                 actions=["ssm:GetParameter"],
                 resources=[
-                    # TODO: this could be another parameter
-                    Fn.sub(f"arn:aws:ssm:${{AWS::Region}}:${{AWS::AccountId}}:parameter/{service_name}/stage-{stage_name}/get-restaurants/*")
+                    ssm_params_path("/search_restaurants/*")
                 ],
                 effect=Effect.ALLOW
             )
@@ -128,7 +134,7 @@ class ApiStack(Stack):
                 "POWERTOOLS_SERVICE_NAME": service_name,
                 # we can't use the API Gateway resource here to know the URL because it would create a circular dependency
                 # "RESTAURANTS_API_URL": Fn.sub(f"https://${{{api_logical_id}}}.execute-api.${{AWS::Region}}.amazonaws.com/{stage_name}/restaurants"),
-                "RESTAURANTS_API_URL": api_url("restaurants"),
+                "RESTAURANTS_API_URL": api_url("/restaurants"),
                 "COGNITO_USER_POOL_ID": cognito_user_pool.user_pool_id,
                 "COGNITO_CLIENT_ID": cognito_web_user_pool_client.user_pool_client_id
             }
@@ -137,7 +143,7 @@ class ApiStack(Stack):
             PolicyStatement(
                 actions=[ "execute-api:Invoke"],
                 resources=[
-                    Fn.sub(f"arn:aws:execute-api:${{AWS::Region}}:${{AWS::AccountId}}:${{{api_logical_id}}}/{stage_name}/GET/restaurants")
+                    Fn.sub(f"arn:aws:execute-api:${{AWS::Region}}:${{AWS::AccountId}}:${{{api_logical_id}}}/{feature_name}/GET/restaurants")
                 ],
                 effect=Effect.ALLOW
             )

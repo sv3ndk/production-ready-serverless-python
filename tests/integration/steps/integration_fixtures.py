@@ -5,22 +5,21 @@ import boto3
 
 cfn_client = boto3.client('cloudformation')
 
+@fixture
+def feature_name() -> str:
+    return os.environ['FEATURE_NAME']
 
 @fixture
-def stage_name() -> str:
-    return os.environ['STAGE_NAME']
+def api_stack_name(feature_name) -> str:
+    return f"API{feature_name}"
 
 @fixture
-def api_stack_name(stage_name) -> str:
-    return f"API-{stage_name}"
+def db_stack_name(feature_name) -> str:
+    return f"DB{feature_name}"
 
 @fixture
-def db_stack_name(stage_name) -> str:
-    return f"DB-{stage_name}"
-
-@fixture
-def cognito_stack_name(stage_name) -> str:
-    return f"Cognito-{stage_name}"
+def cognito_stack_name(feature_name) -> str:
+    return f"Cognito{feature_name}"
 
 
 @fixture

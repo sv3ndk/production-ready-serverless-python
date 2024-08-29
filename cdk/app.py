@@ -8,23 +8,29 @@ from cognito_stack import CognitoStack
 
 app = cdk.App()
 
-stage_name = os.getenv("STAGE_NAME") or "dev"
+# determines the shared namespace for fetching the SSM parameters from: dev, test, acc or prod
+maturity_level = os.getenv("MATURITY_LEVEL")
+
+# name of feature for this environment (e.g. "add_get_restaurants")
+feature_name = os.getenv("FEATURE_NAME")
+
 
 db_stack = DbStack(
     app,
-    construct_id=f"DB-{stage_name}",
+    construct_id=f"DB{feature_name}",
 )
 
 cognito_stack = CognitoStack(
     scope=app,
-    construct_id=f"Cognito-{stage_name}",
+    construct_id=f"Cognito{feature_name}",
 )
 
 ApiStack(
     app,
-    construct_id=f"API-{stage_name}",
-    service_name="production-ready-serverless",
-    stage_name=stage_name,
+    construct_id=f"API{feature_name}",
+    service_name="production_ready_serverless",
+    feature_name=feature_name,
+    maturity_level=maturity_level,
     restaurants_table=db_stack.table,
     cognito_user_pool=cognito_stack.user_pool,
     cognito_web_user_pool_client=cognito_stack.web_user_pool_client,

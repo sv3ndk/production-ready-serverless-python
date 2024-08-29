@@ -10,14 +10,14 @@ from aws_lambda_powertools.logging import Logger
 logger = Logger(log_uncaught_exceptions=True)
 
 TABLE_NAME = os.getenv("TABLE_NAME")
-STAGE_NAME = os.getenv("STAGE_NAME")
-SERVICE_NAME = logger.service
+MATURITY_LEVEL = os.getenv("MATURITY_LEVEL")
+SERVICE_NAME = logger.service.replace("-", "_")
 
 if not TABLE_NAME:
     raise ValueError("TABLE_NAME environment variable is not set")
 
-if not STAGE_NAME:
-    raise ValueError("STAGE_NAME environment variable is not set")
+if not MATURITY_LEVEL:
+    raise ValueError("PARAM_GROUP environment variable is not set")
 
 dynamo_client = boto3.client('dynamodb')
 dynamo_resource = boto3.resource('dynamodb')
@@ -31,7 +31,8 @@ def get_restaurants(result_limit: int) -> dict:
 
 def handler(event, context):
     result_limit_params = parameters.get_parameter(
-            name=f"/{SERVICE_NAME}/stage-{STAGE_NAME}/get-restaurants/config",
+            # /production_ready_serverless/shared_context/dev/get_restaurants/config
+            name=f"/{SERVICE_NAME}/shared_context/{MATURITY_LEVEL}/get_restaurants/config",
             transform="json",
             max_age=60
         )

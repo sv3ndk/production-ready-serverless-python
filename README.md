@@ -25,7 +25,7 @@ Status: Week 2 in-progress
 
 * Test: BDD style [integration tests](tests/integration/features) and [end-to-end tests](tests/end-to-end/features) 
   using pytest-bdd
-* Config obtained from SSM Parameter Store, with a 1 minute TTL
+* Config obtained from SSM Parameter Store
 
 # Dev setup
 
@@ -42,15 +42,26 @@ The `STAGE_NAME` env variable is used to prefix the stack and API names.
 Build and deploy:
 
 ```sh
-STAGE_NAME=feature-foo cdk deploy --all
-STAGE_NAME=feature-foo cdk diff
-...
+MATURITY_LEVEL=dev \
+FEATURE_NAME=feature-foo \
+  cdk deploy \
+  --all
+```
+
+Deployment delta:
+
+```sh
+MATURITY_LEVEL=dev \
+FEATURE_NAME=feature-foo \
+  cdk diff
 ```
 
 Seed the DB:
 
 ```shell
-STAGE_NAME=feature-foo python seed/seed_restaurants.py
+MATURITY_LEVEL=dev \
+FEATURE_NAME=feature-foo \
+  python seed/seed_restaurants.py
 ```
 
 See stack output for the app URL, then open it in a browser.
@@ -78,7 +89,8 @@ pip install -r tests/requirements.txt
 Integration tests are invoking the lambdas handlers directly, relying on resources present in the AWS account. 
  
 ```sh
-STAGE_NAME=feature-foo \
+MATURITY_LEVEL=dev \
+FEATURE_NAME=feature-foo \
 PYTHONPATH=functions/get_index:functions/get_restaurants:functions/search_restaurants \
   pytest tests/integration \
   -s \
@@ -93,9 +105,35 @@ Integration tests are invoking the REST endpoints exposed via the API-gateway.
 Temporary Cognito users are created and deleted during the tests.
 
 ```sh
-STAGE_NAME=feature-foo \
+FEATURE_NAME=feature-foo \
   pytest tests/end-to-end \
   -s \
   -v \
   --gherkin-terminal-reporter -v
+```
+
+# Deployment Configuration
+
+In this project, SSM is used for the configuration shared across different deployments, following the convention:
+
+```
+/{SERVICE_NAME}/shared_context/{MATURITY_LEVEL}/...",
+```
+
+where:
+
+* `SERVICE_NAME` is the name of the service, e.g. `production-ready-serverless`
+* `MATURITY_LEVEL` is linked to the release life cycle, e.g. `dev`, `test`, `acc`, `prod`
+
+This allows to share contextual information, like the URL of 3rd API, across all environments of a given maturity level.
+
+For example, all 'dev' stacks created in the context of a feature branch could share a set of parameters, all the 
+ephemeral deployments created by CI/CD could share another,...
+
+For dynamic configuration that should not be shared across deployment, like feature flags, 
+we could use a convention similar to the following and refresh them regularly at runtime:
+
+```
+# (not currently implemented in this demo project)
+/{SERVICE_NAME}/{FEATURE_NAME}/...",
 ```

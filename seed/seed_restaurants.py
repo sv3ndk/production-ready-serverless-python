@@ -1,8 +1,8 @@
 import os
 import boto3
 
-stage_name = os.environ['STAGE_NAME']
-db_stack_name = f"DB-{stage_name}"
+feature_name = os.environ['FEATURE_NAME']
+db_stack_name = f"DB{feature_name}"
 
 cfn_client = boto3.client('cloudformation')
 
