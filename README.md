@@ -125,10 +125,9 @@ where:
 * `SERVICE_NAME` is the name of the service, e.g. `production-ready-serverless`
 * `MATURITY_LEVEL` is linked to the release life cycle, e.g. `dev`, `test`, `acc`, `prod`
 
-This allows to share contextual information, like the URL of 3rd API, across all environments of a given maturity level.
+Those prameters are expected to be created before the deployment.
 
-For example, all 'dev' stacks created in the context of a feature branch could share a set of parameters, all the 
-ephemeral deployments created by CI/CD could share another,...
+This allows to share contextual information, like the URL of 3rd API, across all environments of a given maturity level.
 
 For dynamic configuration that should not be shared across deployment, like feature flags, 
 we could use a convention similar to the following and refresh them regularly at runtime:

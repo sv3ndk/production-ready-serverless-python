@@ -9,6 +9,7 @@ from aws_cdk import (
 from aws_cdk.aws_apigateway import StageOptions
 from aws_cdk.aws_dynamodb import Table
 from aws_cdk.aws_iam import PolicyStatement, Effect
+from aws_cdk.aws_ssm import StringParameter
 
 from constructs import Construct
 
@@ -158,4 +159,11 @@ class ApiStack(Stack):
             id="root_url",
             key="RootUrl",
             value=api_url()
+        )
+
+        StringParameter(
+            scope=self,
+            id="api_url",
+            parameter_name=f"/{service_name}/{feature_name}/service_url",
+            string_value=api_url()
         )

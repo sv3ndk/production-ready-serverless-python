@@ -48,6 +48,13 @@ def handler(event, context):
     result_limit = int(cast(dict, result_limit_params)["defaultResults"])
     logger.info(f"result_limit_params: {result_limit}")
 
+    some_secret = parameters.get_parameter(
+        # /production_ready_serverless/shared_context/dev/search_restaurants/secrets
+        name=f"/{SERVICE_NAME}/shared_context/{MATURITY_LEVEL}/search_restaurants/secrets",
+        transform=None,
+        max_age=60
+    )
+
     restaurants = search_restaurants(theme=theme, result_limit=result_limit)
 
     return {
