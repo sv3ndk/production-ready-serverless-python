@@ -9,14 +9,12 @@ jobs:
     # this prevents concurrent builds since we are deploying to the same environment
     concurrency: dev-environment
 
-
-    # The type of runner that the job will run on
     runs-on: ubuntu-24.04
 
     # this is required for authenticating to AWS via the OIDC Provider we set up
     permissions:
       id-token: write
-      contents: write
+      contents: read
 
     env:
       MATURITY_LEVEL: dev
@@ -41,7 +39,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-region: eu-west-1
+          aws-region: eu-central-1
           role-to-assume: arn:aws:iam::739786912520:role/gha-production-ready-serverless-python
           role-session-name: GithubActionsSession
 

@@ -117,7 +117,7 @@ FEATURE_NAME=feature-foo \
 In this project, SSM is used for the configuration shared across different deployments, following the convention:
 
 ```
-/{SERVICE_NAME}/shared_context/{MATURITY_LEVEL}/...",
+/{SERVICE_NAME}/shared_context/{MATURITY_LEVEL}/..."
 ```
 
 where:
@@ -135,5 +135,5 @@ we could use a convention similar to the following and refresh them regularly at
 
 ```
 # (not currently implemented in this demo project)
-/{SERVICE_NAME}/{FEATURE_NAME}/...",
+/{SERVICE_NAME}/{FEATURE_NAME}/..."
 ```
