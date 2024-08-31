@@ -6,7 +6,7 @@ course.
 
 # Overview
 
-Status: Week 2 in-progress
+Status: Week 3 in progress
 
 * CDK deployment: [cdk/app.py](cdk/app.py)
 
@@ -25,7 +25,6 @@ Status: Week 2 in-progress
 
 * Test: BDD style [integration tests](tests/integration/features) and [end-to-end tests](tests/end-to-end/features) 
   using pytest-bdd
-* Config obtained from SSM Parameter Store
 
 # Dev setup
 
@@ -112,7 +111,7 @@ FEATURE_NAME=feature-foo \
   --gherkin-terminal-reporter -v
 ```
 
-# Deployment Configuration
+# Shared SSM parameters
 
 In this project, SSM is used for the configuration shared across different deployments, following the convention:
 
@@ -125,7 +124,7 @@ where:
 * `SERVICE_NAME` is the name of the service, e.g. `production-ready-serverless`
 * `MATURITY_LEVEL` is linked to the release life cycle, e.g. `dev`, `test`, `acc`, `prod`
 
-Those prameters are expected to be created before the deployment.
+Those parameters are expected to be created before the deployment.
 
 This allows to share contextual information, like the URL of 3rd API, across all environments of a given maturity level.
 

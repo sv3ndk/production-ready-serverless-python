@@ -304,6 +304,23 @@
         };
       }
 
+      function placeOrder(restaurantName) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', "{{orderUrl}}", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("Authorization", idToken);
+        xhr.send(JSON.stringify({ restaurantName }));
+
+        xhr.onreadystatechange = function (e) {
+          if (xhr.readyState === 4 && xhr.status === 200) {
+            alert("your order has been placed, we'll let you know once it's been accepted by the restaurant!");
+          } else if (xhr.readyState === 4) {
+            alert(xhr.responseText);
+          }
+        };
+      }
+
+
       $(document).ready(function() {
         regDialog = $("#reg-dialog-form").dialog({
           autoOpen: false,
@@ -409,7 +426,7 @@
             <ul id="restaurantsUl" class="row-container">
               {% for restaurant in restaurants %}
               <li class="restaurant">
-                <ul class="column-container">
+                <ul class="column-container" onclick='placeOrder("{{restaurant.name}}")'>
                     <li class="item restaurant-name">{{restaurant.name}}</li>
                     <li class="item restaurant-image">
                       <img src="{{restaurant.image}}">

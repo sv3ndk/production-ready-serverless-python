@@ -8,14 +8,13 @@ from aws_lambda_powertools.utilities import parameters
 from aws_lambda_powertools.logging import Logger
 
 logger = Logger(log_uncaught_exceptions=True)
-
-TABLE_NAME = os.getenv("TABLE_NAME")
-MATURITY_LEVEL = os.getenv("MATURITY_LEVEL")
 SERVICE_NAME = logger.service.replace("-", "_")
 
+TABLE_NAME = os.getenv("TABLE_NAME")
 if not TABLE_NAME:
     raise ValueError("TABLE_NAME environment variable is not set")
 
+MATURITY_LEVEL = os.getenv("MATURITY_LEVEL")
 if not MATURITY_LEVEL:
     raise ValueError("PARAM_GROUP environment variable is not set")
 

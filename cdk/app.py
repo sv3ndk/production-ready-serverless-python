@@ -5,6 +5,7 @@ import os
 from api_stack import ApiStack
 from db_stack import DbStack
 from cognito_stack import CognitoStack
+from event_stack import EventStack
 
 app = cdk.App()
 
@@ -25,6 +26,13 @@ cognito_stack = CognitoStack(
     construct_id=f"Cognito{feature_name}",
 )
 
+event_stack = EventStack(
+    scope=app,
+    construct_id=f"Event{feature_name}",
+    service_name="production_ready_serverless",
+    maturity_level=maturity_level,
+)
+
 ApiStack(
     app,
     construct_id=f"API{feature_name}",
@@ -32,6 +40,7 @@ ApiStack(
     feature_name=feature_name,
     maturity_level=maturity_level,
     restaurants_table=db_stack.table,
+    event_bus=event_stack.event_bus,
     cognito_user_pool=cognito_stack.user_pool,
     cognito_web_user_pool_client=cognito_stack.web_user_pool_client,
     )

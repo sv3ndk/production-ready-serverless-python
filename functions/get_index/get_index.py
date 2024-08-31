@@ -14,6 +14,10 @@ RESTAURANTS_API_URL = os.getenv("RESTAURANTS_API_URL")
 if not RESTAURANTS_API_URL:
     raise ValueError("RESTAURANTS_API_URL environment variable is not set")
 
+ORDER_API_URL = os.getenv("ORDER_API_URL")
+if not ORDER_API_URL:
+    raise ValueError("ORDER_API_URL environment variable is not set")
+
 COGNITO_USER_POOL_ID = os.getenv("COGNITO_USER_POOL_ID")
 if not COGNITO_USER_POOL_ID:
     raise ValueError("COGNITO_USER_POOL_ID environment variable is not set")
@@ -49,6 +53,7 @@ def handler(event, context) -> dict:
         dayOfWeek=day_of_week,
         restaurants=restaurants,
         searchUrl=f"{RESTAURANTS_API_URL}/search",
+        orderUrl=ORDER_API_URL,
         awsRegion=aws_region,
         cognitoUserPoolId=COGNITO_USER_POOL_ID,
         cognitoClientId=COGNITO_CLIENT_ID

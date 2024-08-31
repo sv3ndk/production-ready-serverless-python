@@ -1,10 +1,13 @@
 from aws_cdk import (
     Stack,
     Fn,
+    aws_cognito,
     aws_lambda,
     aws_apigateway,
     aws_lambda_python_alpha,
-    aws_cognito, CfnOutput, Duration
+    aws_events,
+    CfnOutput,
+    Duration
 )
 from aws_cdk.aws_apigateway import StageOptions
 from aws_cdk.aws_dynamodb import Table
@@ -20,10 +23,13 @@ class ApiStack(Stack):
             self,
             scope: Construct,
             construct_id: str,
+
             service_name: str,
             feature_name: str,
             maturity_level: str,
+
             restaurants_table: Table,
+            event_bus: aws_events.EventBus,
             cognito_user_pool: aws_cognito.UserPool,
             cognito_web_user_pool_client: aws_cognito.UserPoolClient,
             **kwargs) -> None:
@@ -47,6 +53,12 @@ class ApiStack(Stack):
             Returns the SSM parameter path for the given suffix.
             """
             return Fn.sub(f"arn:aws:ssm:${{AWS::Region}}:${{AWS::AccountId}}:parameter/{service_name}/shared_context/{maturity_level}{suffix}")
+
+        cognito_authorizer = aws_apigateway.CognitoUserPoolsAuthorizer(
+            scope=self,
+            id="CognitoAuthorizer",
+            cognito_user_pools=[cognito_user_pool],
+        )
 
         # GET /restaurants
         # internal API: protected by IAM
@@ -113,11 +125,8 @@ class ApiStack(Stack):
         restaurants_api.add_resource('search').add_method(
             http_method='POST',
             integration=aws_apigateway.LambdaIntegration(search_restaurants_fn),
-            authorizer=aws_apigateway.CognitoUserPoolsAuthorizer(
-                scope=self,
-                id="CognitoAuthorizer",
-                cognito_user_pools=[cognito_user_pool],
-            ),
+            authorization_type=aws_apigateway.AuthorizationType.COGNITO,
+            authorizer=cognito_authorizer
         )
 
         # GET /
@@ -136,6 +145,7 @@ class ApiStack(Stack):
                 # we can't use the API Gateway resource here to know the URL because it would create a circular dependency
                 # "RESTAURANTS_API_URL": Fn.sub(f"https://${{{api_logical_id}}}.execute-api.${{AWS::Region}}.amazonaws.com/{stage_name}/restaurants"),
                 "RESTAURANTS_API_URL": api_url("/restaurants"),
+                "ORDER_API_URL": api_url("/orders"),
                 "COGNITO_USER_POOL_ID": cognito_user_pool.user_pool_id,
                 "COGNITO_CLIENT_ID": cognito_web_user_pool_client.user_pool_client_id
             }
@@ -153,6 +163,33 @@ class ApiStack(Stack):
             "GET",
             aws_apigateway.LambdaIntegration(get_index_fn)
         )
+
+        # ------
+        # POST /orders
+
+        place_order_fn = aws_lambda_python_alpha.PythonFunction(
+            scope=self,
+            id="place_order",
+            entry="functions/place_order",
+            index="place_order.py",
+            handler="handler",
+            timeout=Duration.seconds(5),
+            runtime=aws_lambda.Runtime.PYTHON_3_12,
+            environment={
+                "POWERTOOLS_SERVICE_NAME": service_name,
+                "MATURITY_LEVEL": maturity_level,
+                "EVENT_BUS_NAME": event_bus.event_bus_name,
+            }
+        )
+        event_bus.grant_put_events_to(place_order_fn)
+        api.root.add_resource('orders').add_method(
+            http_method='POST',
+            integration=aws_apigateway.LambdaIntegration(place_order_fn),
+            authorization_type=aws_apigateway.AuthorizationType.COGNITO,
+            authorizer=cognito_authorizer
+        )
+
+        # ----------
 
         CfnOutput(
             scope=self,
