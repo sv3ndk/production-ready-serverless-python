@@ -137,6 +137,7 @@ Integration tests are invoking the REST endpoints exposed via the API-gateway.
 Temporary Cognito users are created and deleted during the tests.
 
 ```sh
+PYTHONPATH=src/functions/place_order \
 FEATURE_NAME=feature-foo \
   pytest tests/end-to-end \
   -s \
@@ -147,6 +148,7 @@ FEATURE_NAME=feature-foo \
 Add `-k` to run a specific test file, e.g.:
 
 ```sh
+PYTHONPATH=src/functions/place_order \
 FEATURE_NAME=feature-foo \
   pytest tests/end-to-end \
   -s \

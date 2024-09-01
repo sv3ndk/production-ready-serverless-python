@@ -68,6 +68,8 @@ jobs:
           --gherkin-terminal-reporter -v
 
       - name: run end-to-end tests
+        env:
+          PYTHONPATH: src/functions/place_order
         run: |
           pytest tests/end-to-end \
             -s \
