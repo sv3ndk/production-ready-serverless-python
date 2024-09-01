@@ -17,7 +17,7 @@ def search_restaurants(restaurant_table_name: str) -> Callable:
     return search_restaurants.handler
 
 
-@when(parsers.parse("I search for the restaurant with theme ${theme}"), target_fixture="restaurants_response")
+@when(parsers.parse("I search for the restaurant with theme {theme}"), target_fixture="restaurants_response")
 def search_restaurants(search_restaurants_handler: Callable, theme: str) -> dict:
     return search_restaurants_handler(
         {
@@ -29,7 +29,7 @@ def search_restaurants(search_restaurants_handler: Callable, theme: str) -> dict
     )
 
 
-@then(parsers.parse("I get a list of ${count:d} restaurants"))
+@then(parsers.parse("I get a list of {count:d} restaurants"))
 def check_search_restaurants_count(restaurants_response: dict, count: int):
     print(restaurants_response)
     assert restaurants_response['statusCode'] == 200
@@ -38,7 +38,7 @@ def check_search_restaurants_count(restaurants_response: dict, count: int):
     assert len(body) == count
 
 
-@then(parsers.parse("All restaurants have the theme ${theme}"))
+@then(parsers.parse("All restaurants have the theme {theme}"))
 def check_search_restaurants_count(restaurants_response: dict, theme: str):
     assert restaurants_response['statusCode'] == 200
     assert "application/json" in restaurants_response["multiValueHeaders"]['Content-Type']

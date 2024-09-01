@@ -21,7 +21,7 @@ def get_restaurants():
 def get_restaurants(app_restaurant_url: str, auth) -> Response:
     return requests.get(app_restaurant_url, auth=auth)
 
-@then(parsers.parse("They get a list of ${count:d} restaurants"))
+@then(parsers.parse("They get a list of {count:d} restaurants"))
 def check_get_restaurant_count(restaurants_response: Response, count: int):
     assert restaurants_response.status_code == 200
     assert restaurants_response.headers["Content-Type"] == "application/json"
