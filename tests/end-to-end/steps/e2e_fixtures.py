@@ -8,6 +8,7 @@ from pytest_bdd import given
 
 cfn_client = boto3.client('cloudformation')
 
+# -------------------
 # pytest fixtures
 
 @fixture
@@ -26,6 +27,10 @@ def db_stack_name(feature_name) -> str:
 def cognito_stack_name(feature_name) -> str:
     return f"Cognito{feature_name}"
 
+@fixture
+def event_stack_name(feature_name) -> str:
+    return f"Event{feature_name}"
+
 
 @fixture
 def api_stack_outputs(api_stack_name: str) -> dict:
@@ -40,16 +45,28 @@ def cognito_stack_outputs(cognito_stack_name: str) -> dict:
     return {output["OutputKey"]: output["OutputValue"] for output in outputs}
 
 @fixture
+def event_stack_outputs(event_stack_name: str) -> dict:
+    event_stack = cfn_client.describe_stacks(StackName=event_stack_name)
+    outputs = event_stack["Stacks"][0]["Outputs"]
+    return {output["OutputKey"]: output["OutputValue"] for output in outputs}
+
+
+@fixture
 def app_root_url(api_stack_outputs: dict) -> str:
     return api_stack_outputs["RootUrl"]
 
 @fixture
-def app_restaurant_url(app_root_url: str) -> str:
+def get_restaurant_api_url(app_root_url: str) -> str:
     return f"{app_root_url}restaurants"
 
 @fixture
-def search_restaurant_url(app_restaurant_url: str) -> str:
-    return f"{app_restaurant_url}/search"
+def search_restaurant_api_url(get_restaurant_api_url: str) -> str:
+    return f"{get_restaurant_api_url}/search"
+
+@fixture
+def order_api_url(app_root_url: str) -> str:
+    return f"{app_root_url}orders"
+
 
 @fixture
 def cognito_user_pool_id(cognito_stack_outputs: dict) -> str:
@@ -60,7 +77,16 @@ def cognito_server_user_pool_client_id(cognito_stack_outputs: dict) -> str:
     return cognito_stack_outputs["ServerUserPoolClientId"]
 
 
-# common @given steps
+@fixture
+def event_bus_arn(event_stack_outputs: dict) -> str:
+    return event_stack_outputs["EventBusArn"]
+
+@fixture
+def restaurant_notification_topic_arn(event_stack_outputs: dict) -> str:
+    return event_stack_outputs["RestaurantNotificationTopicArn"]
+
+# -------------------
+# common Gherkins steps
 
 @dataclass
 class AuthenticatedUser:

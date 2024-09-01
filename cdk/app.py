@@ -9,12 +9,13 @@ from event_stack import EventStack
 
 app = cdk.App()
 
-# determines the shared namespace for fetching the SSM parameters from: dev, test, acc or prod
+service_name = "production_ready_serverless"
+
 maturity_level = os.getenv("MATURITY_LEVEL")
+assert maturity_level in ["dev", "test", "acc", "prod"], f"Invalid maturity level: {maturity_level}"
 
-# name of feature for this environment (e.g. "add_get_restaurants")
 feature_name = os.getenv("FEATURE_NAME")
-
+assert feature_name, "FEATURE_NAME environment variable must be set"
 
 db_stack = DbStack(
     app,
@@ -29,14 +30,14 @@ cognito_stack = CognitoStack(
 event_stack = EventStack(
     scope=app,
     construct_id=f"Event{feature_name}",
-    service_name="production_ready_serverless",
+    service_name=service_name,
     maturity_level=maturity_level,
 )
 
 ApiStack(
     app,
     construct_id=f"API{feature_name}",
-    service_name="production_ready_serverless",
+    service_name=service_name,
     feature_name=feature_name,
     maturity_level=maturity_level,
     restaurants_table=db_stack.table,

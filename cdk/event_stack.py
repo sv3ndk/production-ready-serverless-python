@@ -1,7 +1,7 @@
 from aws_cdk import (
     Stack,
     aws_events,
-    aws_sns, aws_lambda_python_alpha, Duration, aws_lambda, aws_events_targets
+    aws_sns, aws_lambda_python_alpha, Duration, aws_lambda, aws_events_targets, CfnOutput
 )
 from aws_cdk.aws_events import EventPattern
 from constructs import Construct
@@ -58,3 +58,14 @@ class EventStack(Stack):
             )
         )
         rule.add_target(target=aws_events_targets.LambdaFunction(handler=notify_restaurant_fn))
+
+        CfnOutput(
+            scope=self,
+            id="EventBusArn",
+            value=self.event_bus.event_bus_arn
+        )
+        CfnOutput(
+            scope=self,
+            id="RestaurantNotificationTopicArn",
+            value=self.topic.topic_arn
+        )

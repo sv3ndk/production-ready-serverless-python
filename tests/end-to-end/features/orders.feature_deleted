@@ -1,6 +1,0 @@
-Feature ordering meals
-
-  Scenario: Happy path scenario
-    Given A Cognito authenticated user
-    When They order a meal at "$Leaky Cauldron"
-    Then A list of $4 restaurants is received

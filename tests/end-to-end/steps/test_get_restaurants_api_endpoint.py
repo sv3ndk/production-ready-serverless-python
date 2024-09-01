@@ -1,7 +1,7 @@
 import botocore.session
 import requests
 
-from end_to_end_fixtures import  *
+from e2e_fixtures import  *
 import json
 from pytest_bdd import given, when, then, scenarios, parsers
 from requests import Response
@@ -18,8 +18,8 @@ def get_restaurants():
     )
 
 @when("They call the restaurant API endpoint", target_fixture="restaurants_response")
-def get_restaurants(app_restaurant_url: str, auth) -> Response:
-    return requests.get(app_restaurant_url, auth=auth)
+def get_restaurants(get_restaurant_api_url: str, auth) -> Response:
+    return requests.get(get_restaurant_api_url, auth=auth)
 
 @then(parsers.parse("They get a list of {count:d} restaurants"))
 def check_get_restaurant_count(restaurants_response: Response, count: int):

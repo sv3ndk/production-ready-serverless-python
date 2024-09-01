@@ -30,8 +30,10 @@ Status: Week 3 in progress
 
 * database: DynamoDB
 
-* Test: BDD style [integration tests](tests/integration/features) and [end-to-end tests](tests/end-to-end/features) 
-  using pytest-bdd
+* Tests: 
+  * BDD style [integration tests](tests/integration/features) and [end-to-end tests](tests/end-to-end/features) 
+    using pytest-bdd
+  * Event-driven cases are validated by creating temporary SQS test queues to capture the events during the tests
 
 # Dev setup
 
@@ -142,3 +144,13 @@ FEATURE_NAME=feature-foo \
   --gherkin-terminal-reporter -v
 ```
 
+Add `-k` to run a specific test file, e.g.:
+
+```sh
+FEATURE_NAME=feature-foo \
+  pytest tests/end-to-end \
+  -s \
+  -v \
+  --gherkin-terminal-reporter -v \
+  -k test_orders_scenarios.py
+```

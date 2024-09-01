@@ -1,6 +1,6 @@
 from requests import Response
 
-from end_to_end_fixtures import *
+from e2e_fixtures import *
 from bs4 import BeautifulSoup
 import requests
 from pytest_bdd import given, when, then, scenarios, parsers
