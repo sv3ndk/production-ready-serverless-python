@@ -33,7 +33,7 @@ jobs:
       - name: setup python libs
         run: |
           pip install -r cdk/requirements.txt
-          pip install -r functions/get_index/requirements.txt
+          pip install -r src/functions/get_index/requirements.txt
           pip install -r tests/requirements.txt
 
       - name: Configure AWS Credentials
@@ -60,7 +60,7 @@ jobs:
 
       - name: run integration test
         env:
-          PYTHONPATH: functions/get_index:functions/get_restaurants:functions/search_restaurants
+          PYTHONPATH: src/functions/get_index:src/functions/get_restaurants:src/functions/search_restaurants
         run: |
           pytest tests/integration \
           -s \

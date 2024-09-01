@@ -11,7 +11,10 @@ Status: Week 3 in progress
 * CDK deployment: [cdk/app.py](cdk/app.py)
 
 * REST API:
-  * lambda functions with lambda-power-tools handling and pydantic data models, exposed via a REST API Gateway
+  * implementation:
+    * lambda functions exposed via a REST API Gateway
+    * handled by lambda-power-tools REST resolver
+    * pydantic data models
   * endpoints:
     * `/restaurants`: 
       * internal API listing all restaurants from DynamoDB
@@ -38,9 +41,33 @@ source .venv-box/bin/activate
 pip install -r cdk/requirements.txt
 ```
 
+# Shared SSM parameters
+
+In this project, SSM is used for the configuration shared across different deployments, following the convention:
+
+```
+/{SERVICE_NAME}/shared_context/{MATURITY_LEVEL}/..."
+```
+
+where:
+
+* `SERVICE_NAME` is the name of the service, e.g. `production-ready-serverless`
+* `MATURITY_LEVEL` is linked to the release life cycle, e.g. `dev`, `test`, `acc`, `prod`
+
+Those parameters are expected to be created before the deployment and their value is shared across all deployments 
+having the same maturity level. This allows to share contextual information, like the URL of 3rd API,...
+
+For dynamic configuration that should not be shared across deployments, e.g. feature flags,  we could use a 
+convention similar to the following instead:
+
+```
+# (not currently implemented in this demo project)
+/{SERVICE_NAME}/{FEATURE_NAME}/..."
+```
+
 # How to use
 
-The `STAGE_NAME` env variable is used to prefix the stack and API names.
+The `FEATURE_NAME` env variable is used to prefix the stack and API names.
 
 Build and deploy:
 
@@ -115,27 +142,3 @@ FEATURE_NAME=feature-foo \
   --gherkin-terminal-reporter -v
 ```
 
-# Shared SSM parameters
-
-In this project, SSM is used for the configuration shared across different deployments, following the convention:
-
-```
-/{SERVICE_NAME}/shared_context/{MATURITY_LEVEL}/..."
-```
-
-where:
-
-* `SERVICE_NAME` is the name of the service, e.g. `production-ready-serverless`
-* `MATURITY_LEVEL` is linked to the release life cycle, e.g. `dev`, `test`, `acc`, `prod`
-
-Those parameters are expected to be created before the deployment.
-
-This allows to share contextual information, like the URL of 3rd API, across all environments of a given maturity level.
-
-For dynamic configuration that should not be shared across deployments, e.g. feature flags, 
-we could use a convention similar to the following instead:
-
-```
-# (not currently implemented in this demo project)
-/{SERVICE_NAME}/{FEATURE_NAME}/..."
-```
