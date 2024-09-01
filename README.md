@@ -128,8 +128,8 @@ Those parameters are expected to be created before the deployment.
 
 This allows to share contextual information, like the URL of 3rd API, across all environments of a given maturity level.
 
-For dynamic configuration that should not be shared across deployment, like feature flags, 
-we could use a convention similar to the following and refresh them regularly at runtime:
+For dynamic configuration that should not be shared across deployments, e.g. feature flags, 
+we could use a convention similar to the following instead:
 
 ```
 # (not currently implemented in this demo project)

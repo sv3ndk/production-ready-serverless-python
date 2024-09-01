@@ -54,6 +54,10 @@ def restaurant_table_name(db_stack_outputs: dict) -> str:
     return db_stack_outputs["RestaurantsTableName"]
 
 @fixture
+def app_order_url(app_root_url: str) -> str:
+    return f"{app_root_url}/orders"
+
+@fixture
 def cognito_user_pool_id(cognito_stack_outputs: dict) -> str:
     return cognito_stack_outputs["UserPoolId"]
 

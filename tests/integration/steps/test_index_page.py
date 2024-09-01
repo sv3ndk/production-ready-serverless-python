@@ -8,9 +8,15 @@ from pytest_bdd import given, when, then, scenarios, parsers
 scenarios("../features/index_page.feature")
 
 @given("The get_index lambda", target_fixture="get_index_handler")
-def get_get_index_handler(app_restaurant_url: str, cognito_user_pool_id: str, cognito_web_user_pool_client_id: str) -> Callable:
+def get_get_index_handler(
+        app_restaurant_url: str,
+        app_order_url: str,
+        cognito_user_pool_id: str,
+        cognito_web_user_pool_client_id: str
+) -> Callable:
     # re-create the environment variables expected by the Lambda function
     os.environ["RESTAURANTS_API_URL"] = app_restaurant_url
+    os.environ["ORDER_API_URL"] = app_order_url
     os.environ["COGNITO_USER_POOL_ID"] = cognito_user_pool_id
     os.environ["COGNITO_CLIENT_ID"] = cognito_web_user_pool_client_id
     os.environ["POWERTOOLS_SERVICE_NAME"] = "production-ready-serverless"
