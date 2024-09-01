@@ -1,13 +1,17 @@
-import json
 from typing import cast
 
 import boto3
 import os
 
+from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.utilities import parameters
 from aws_lambda_powertools.logging import Logger
+from aws_lambda_powertools.utilities.typing import LambdaContext
+from pydantic import BaseModel
 
 logger = Logger(log_uncaught_exceptions=True)
+web_app = APIGatewayRestResolver(enable_validation=True)
+
 
 TABLE_NAME = os.getenv("TABLE_NAME")
 MATURITY_LEVEL = os.getenv("MATURITY_LEVEL")
@@ -25,7 +29,7 @@ dynamo_resource = boto3.resource('dynamodb')
 restaurant_table_client = dynamo_resource.Table(TABLE_NAME)
 
 
-def search_restaurants(theme: str, result_limit: int) -> dict:
+def search_restaurants(theme: str, result_limit: int) -> list[dict]:
     response = restaurant_table_client.scan(
         Limit=int(result_limit),
         FilterExpression="contains(themes, :theme)",
@@ -35,10 +39,11 @@ def search_restaurants(theme: str, result_limit: int) -> dict:
     )
     return response['Items']
 
+class SearchRestaurantsRequest(BaseModel):
+    theme: str
 
-def handler(event, context):
-    theme = json.loads(event["body"])["theme"]
-
+@web_app.post("/restaurants/search")
+def search(body: SearchRestaurantsRequest) -> list[dict]:
     result_limit_params = parameters.get_parameter(
             # /production_ready_serverless/shared_context/dev/search_restaurants/config
             name=f"/{SERVICE_NAME}/shared_context/{MATURITY_LEVEL}/search_restaurants/config",
@@ -55,12 +60,8 @@ def handler(event, context):
         max_age=60
     )
 
-    restaurants = search_restaurants(theme=theme, result_limit=result_limit)
+    restaurants = search_restaurants(theme=body.theme, result_limit=result_limit)
+    return restaurants
 
-    return {
-        "statusCode": 200,
-        "headers": {
-            "Content-Type": "application/json"
-        },
-        "body": json.dumps(restaurants)
-    }
+def handler(event: dict, context: LambdaContext) -> dict:
+    return web_app.resolve(event, context)

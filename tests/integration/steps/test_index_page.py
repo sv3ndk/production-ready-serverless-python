@@ -25,12 +25,17 @@ def get_get_index_handler(
 
 @when("I navigate to the main page", target_fixture="index_response")
 def get_index_page(get_index_handler) -> dict:
-    return get_index_handler({}, {})
+    return get_index_handler(
+        {
+            "path": "/",
+            "httpMethod": "GET",
+        },
+        {})
 
 @then("I see the big mouth logo")
 def check_big_mouth_logo(index_response: dict):
     assert index_response['statusCode'] == 200
-    assert index_response["headers"]['Content-Type'] == "text/html"
+    assert "text/html" in index_response["multiValueHeaders"]['Content-Type']
     soup = BeautifulSoup(index_response['body'], "html.parser")
     assert soup.find("img", id="logo", src="https://d2qt42rcwzspd6.cloudfront.net/manning/big-mouth.png") is not None
 
@@ -38,7 +43,7 @@ def check_big_mouth_logo(index_response: dict):
 @then("I see {count:d} restaurants")
 def check_restaurants_count(index_response: dict, count: int):
     assert index_response['statusCode'] == 200
-    assert index_response["headers"]['Content-Type'] == "text/html"
+    assert "text/html" in index_response["multiValueHeaders"]['Content-Type']
     soup = BeautifulSoup(index_response['body'], "html.parser")
     restaurants = soup.find_all("li", class_="restaurant")
     assert len(restaurants) == count

@@ -33,7 +33,7 @@ class EventStack(Stack):
         notify_restaurant_fn = aws_lambda_python_alpha.PythonFunction(
             scope=self,
             id="notify_restaurant",
-            entry="functions/notify_restaurant",
+            entry="src/functions/notify_restaurant",
             index="notify_restaurant.py",
             handler="handler",
             timeout=Duration.seconds(5),

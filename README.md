@@ -10,18 +10,22 @@ Status: Week 3 in progress
 
 * CDK deployment: [cdk/app.py](cdk/app.py)
 
-* API (lambdas, behind a REST API on the API Gateway)
-  * `/restaurants`: 
-    * internal API listing all restaurants from DynamoDB
-    * protected by IAM
-  * `/restaurants/search`: 
-    * search by attribute in DynamoDB 
-    * protected by Cognito: simply checking if the user has a JWT token for the configured Cognito user pool
-  * `/` : 
-    * public HTML page 
-    * queries data from `/restaurants` on server side, signing requests with sigv4
-    * is allowing users to create/sign in the Cognito user pool, using SRP
-    * uses the Cognito JWT token to send requests from the browser to `/restaurants/search`
+* REST API:
+  * lambda functions with lambda-power-tools handling and pydantic data models, exposed via a REST API Gateway
+  * endpoints:
+    * `/restaurants`: 
+      * internal API listing all restaurants from DynamoDB
+      * protected by IAM
+    * `/restaurants/search`: 
+      * search by attribute in DynamoDB 
+      * protected by Cognito: simply checking if the user has a JWT token for the configured Cognito user pool
+    * `/` : 
+      * public HTML page 
+      * queries data from `/restaurants` on server side, signing requests with sigv4
+      * allows users to register or sign in to the Cognito user pool, using SRP
+      * uses the Cognito JWT token to send requests from the browser to `/restaurants/search`
+
+* database: DynamoDB
 
 * Test: BDD style [integration tests](tests/integration/features) and [end-to-end tests](tests/end-to-end/features) 
   using pytest-bdd
@@ -90,7 +94,7 @@ Integration tests are invoking the lambdas handlers directly, relying on resourc
 ```sh
 MATURITY_LEVEL=dev \
 FEATURE_NAME=feature-foo \
-PYTHONPATH=functions/get_index:functions/get_restaurants:functions/search_restaurants \
+PYTHONPATH=src/functions/get_index:src/functions/get_restaurants:src/functions/search_restaurants \
   pytest tests/integration \
   -s \
   -v \

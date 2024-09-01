@@ -1,13 +1,16 @@
-import json
 from typing import cast
 
 import boto3
 import os
 
+from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.utilities import parameters
 from aws_lambda_powertools.logging import Logger
+from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = Logger(log_uncaught_exceptions=True)
+web_app = APIGatewayRestResolver(enable_validation=True)
+
 SERVICE_NAME = logger.service.replace("-", "_")
 
 TABLE_NAME = os.getenv("TABLE_NAME")
@@ -23,26 +26,24 @@ dynamo_resource = boto3.resource('dynamodb')
 restaurant_table_client = dynamo_resource.Table(TABLE_NAME)
 
 
-def get_restaurants(result_limit: int) -> dict:
+def get_restaurants_from_db(result_limit: int) -> list[dict]:
     response = restaurant_table_client.scan(Limit=result_limit)
     return response['Items']
 
 
-def handler(event, context):
+@web_app.get("/restaurants")
+def get_restaurants() -> list[dict]:
     result_limit_params = parameters.get_parameter(
-            # /production_ready_serverless/shared_context/dev/get_restaurants/config
-            name=f"/{SERVICE_NAME}/shared_context/{MATURITY_LEVEL}/get_restaurants/config",
-            transform="json",
-            max_age=60
-        )
+        # /production_ready_serverless/shared_context/dev/get_restaurants/config
+        name=f"/{SERVICE_NAME}/shared_context/{MATURITY_LEVEL}/get_restaurants/config",
+        transform="json",
+        max_age=60
+    )
     result_limit = int(cast(dict, result_limit_params)["defaultResults"])
     logger.info(f"result_limit_params: {result_limit}")
 
-    restaurants = get_restaurants(result_limit=result_limit)
-    return {
-        "statusCode": 200,
-        "headers": {
-            "Content-Type": "application/json"
-        },
-        "body": json.dumps(restaurants)
-    }
+    return get_restaurants_from_db(result_limit=result_limit)
+
+
+def handler(event: dict, context: LambdaContext) -> dict:
+    return web_app.resolve(event, context)

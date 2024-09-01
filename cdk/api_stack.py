@@ -66,7 +66,7 @@ class ApiStack(Stack):
         get_restaurants_fn = aws_lambda_python_alpha.PythonFunction(
             scope=self,
             id="get_restaurants",
-            entry="functions/get_restaurants",
+            entry="src/functions/get_restaurants",
             index="get_restaurants.py",
             handler="handler",
             timeout=Duration.seconds(15),
@@ -100,7 +100,7 @@ class ApiStack(Stack):
         search_restaurants_fn = aws_lambda_python_alpha.PythonFunction(
             scope=self,
             id="search_restaurants",
-            entry="functions/search_restaurants",
+            entry="src/functions/search_restaurants",
             index="search_restaurants.py",
             handler="handler",
             timeout=Duration.seconds(15),
@@ -135,7 +135,7 @@ class ApiStack(Stack):
         get_index_fn = aws_lambda_python_alpha.PythonFunction(
             scope=self,
             id="get_index",
-            entry="functions/get_index",
+            entry="src/functions/get_index",
             index="get_index.py",
             handler="handler",
             timeout=Duration.seconds(15),
@@ -170,7 +170,7 @@ class ApiStack(Stack):
         place_order_fn = aws_lambda_python_alpha.PythonFunction(
             scope=self,
             id="place_order",
-            entry="functions/place_order",
+            entry="src/functions/place_order",
             index="place_order.py",
             handler="handler",
             timeout=Duration.seconds(5),

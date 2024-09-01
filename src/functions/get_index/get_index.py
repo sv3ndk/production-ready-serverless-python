@@ -1,13 +1,18 @@
+from http import HTTPStatus
+
 import boto3
 import botocore.session
 import datetime
 import os
 import jinja2
 import requests
+from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response, content_types
+from aws_lambda_powertools.utilities.typing import LambdaContext
 from requests_aws4auth import AWS4Auth
 from aws_lambda_powertools.logging import Logger
 
 logger = Logger(log_uncaught_exceptions=True)
+web_app = APIGatewayRestResolver(enable_validation=True)
 
 
 RESTAURANTS_API_URL = os.getenv("RESTAURANTS_API_URL")
@@ -43,7 +48,8 @@ def all_restaurants() -> list[dict]:
     return response.json()
 
 
-def handler(event, context) -> dict:
+@web_app.get("/")
+def get_index():
     restaurants = all_restaurants()
     logger.info(f"restaurants: {restaurants}")
     day_of_week = datetime.datetime.today().strftime("%A")
@@ -59,10 +65,11 @@ def handler(event, context) -> dict:
         cognitoClientId=COGNITO_CLIENT_ID
     )
 
-    return {
-        'statusCode': 200,
-        'headers': {
-            'Content-Type': 'text/html',
-        },
-        'body': index_html
-    }
+    return Response(
+        status_code=HTTPStatus.OK.value,
+        content_type=content_types.TEXT_HTML,
+        body=index_html
+    )
+
+def handler(event: dict, context: LambdaContext) -> dict:
+    return web_app.resolve(event, context)
