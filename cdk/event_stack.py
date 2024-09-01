@@ -66,6 +66,11 @@ class EventStack(Stack):
         )
         CfnOutput(
             scope=self,
+            id="EventBusName",
+            value=self.event_bus.event_bus_name
+        )
+        CfnOutput(
+            scope=self,
             id="RestaurantNotificationTopicArn",
             value=self.topic.topic_arn
         )

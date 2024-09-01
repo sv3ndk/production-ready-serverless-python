@@ -82,6 +82,10 @@ def event_bus_arn(event_stack_outputs: dict) -> str:
     return event_stack_outputs["EventBusArn"]
 
 @fixture
+def event_bus_name(event_stack_outputs: dict) -> str:
+    return event_stack_outputs["EventBusName"]
+
+@fixture
 def restaurant_notification_topic_arn(event_stack_outputs: dict) -> str:
     return event_stack_outputs["RestaurantNotificationTopicArn"]
 
