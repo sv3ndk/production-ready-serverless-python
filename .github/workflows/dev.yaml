@@ -8,6 +8,7 @@ jobs:
   deploy:
     # this prevents concurrent builds since we are deploying to the same environment
     concurrency: dev-environment
+    timeout-minutes: 20
 
     runs-on: ubuntu-24.04
 

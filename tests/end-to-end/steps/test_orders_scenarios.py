@@ -76,6 +76,8 @@ def expect_order_event_in_event_bus_probe(restaurant_name: str, event_bus_probe_
     )
     print(f"events received {events}")
 
+    assert len(events) == 2
+
     # sort events by detail-type to make the test deterministic since EventBridge does not guarantee order
     events=sorted(events, key=lambda x: x["detail-type"])
 

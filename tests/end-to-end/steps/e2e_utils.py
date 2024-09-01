@@ -113,7 +113,7 @@ def temporary_queue_subscribed_to_event_bus(event_bus_name: str, event_pattern: 
 
         # not sure why, but even when marked as "ENABLED", we sometimes miss the first events
         # => wait a bit more, which likely makes the test flaky and unnecessarily slow :(
-        time.sleep(10)
+        time.sleep(20)
 
         yield tmp_queue
 
