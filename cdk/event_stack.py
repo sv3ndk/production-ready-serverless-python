@@ -28,7 +28,6 @@ class EventStack(Stack):
         self.topic = aws_sns.Topic(
             scope=self,
             id="RestaurantNotificationTopic",
-            topic_name="RestaurantNotificationTopic"
         )
 
         notify_restaurant_fn = aws_lambda_python_alpha.PythonFunction(
