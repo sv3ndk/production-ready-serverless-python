@@ -3,6 +3,7 @@ from aws_cdk import (
     aws_events,
     aws_sns, aws_lambda_python_alpha, Duration, aws_lambda, aws_events_targets, CfnOutput
 )
+from aws_cdk.aws_dynamodb import Table
 from aws_cdk.aws_events import EventPattern
 from constructs import Construct
 
@@ -16,6 +17,7 @@ class EventStack(Stack):
 
             service_name: str,
             maturity_level: str,
+            idempotency_table: Table,
 
             **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -42,11 +44,13 @@ class EventStack(Stack):
                 "POWERTOOLS_SERVICE_NAME": service_name,
                 "MATURITY_LEVEL": maturity_level,
                 "EVENT_BUS_NAME": self.event_bus.event_bus_name,
-                "TOPIC_ARN": self.topic.topic_arn
+                "TOPIC_ARN": self.topic.topic_arn,
+                "IDEMPOTENCY_TABLE_NAME": idempotency_table.table_name
             }
         )
         self.event_bus.grant_put_events_to(notify_restaurant_fn)
         self.topic.grant_publish(notify_restaurant_fn)
+        idempotency_table.grant_read_write_data(notify_restaurant_fn)
 
         rule = aws_events.Rule(
             scope=self,

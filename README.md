@@ -28,6 +28,9 @@ Status: Week 3 in progress
       * allows users to register or sign in to the Cognito user pool, using SRP
       * uses the Cognito JWT token to send requests from the browser to `/restaurants/search`
 
+* [Lambda Power Tools](https://docs.powertools.aws.dev/lambda/python/latest/) is used for logging, idempotency and
+  event sourced event parsing.
+
 * database: DynamoDB
 
 * Tests: 
