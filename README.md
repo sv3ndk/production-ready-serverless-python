@@ -11,25 +11,26 @@ Status: Week 3 in progress
 * CDK deployment: [cdk/app.py](cdk/app.py)
 
 * REST API:
-  * implementation:
-    * lambda functions exposed via a REST API Gateway
-    * handled by lambda-power-tools REST resolver
-    * pydantic data models
+  * lambda functions exposed behing a REST API Gateway, handled with lambda power tools and pydantic data models
   * endpoints:
     * `/restaurants`: 
       * internal API listing all restaurants from DynamoDB
-      * protected by IAM
+      * protected with IAM
     * `/restaurants/search`: 
       * search by attribute in DynamoDB 
-      * protected by Cognito: simply checking if the user has a JWT token for the configured Cognito user pool
+      * protected with Cognito
+    * `/orders`: 
+      * used to post new orders
+      * protected with Cognito
+      * asynchronous processing: event is pushed to EventBridge, then processed by a lambda
     * `/` : 
       * public HTML page 
       * queries data from `/restaurants` on server side, signing requests with sigv4
       * allows users to register or sign in to the Cognito user pool, using SRP
       * uses the Cognito JWT token to send requests from the browser to `/restaurants/search`
 
-* [Lambda Power Tools](https://docs.powertools.aws.dev/lambda/python/latest/) is used for logging, idempotency and
-  event sourced event parsing.
+* [Lambda Power Tools](https://docs.powertools.aws.dev/lambda/python/latest/) is used for REST request handling, 
+  idempotency, event sourced event parsing and logging
 
 * database: DynamoDB
 

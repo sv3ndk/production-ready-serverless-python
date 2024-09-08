@@ -19,7 +19,7 @@ if not TABLE_NAME:
 
 MATURITY_LEVEL = os.getenv("MATURITY_LEVEL")
 if not MATURITY_LEVEL:
-    raise ValueError("PARAM_GROUP environment variable is not set")
+    raise ValueError("MATURITY_LEVEL environment variable is not set")
 
 dynamo_client = boto3.client('dynamodb')
 dynamo_resource = boto3.resource('dynamodb')
