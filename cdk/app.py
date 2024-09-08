@@ -31,6 +31,7 @@ event_stack = EventStack(
     scope=app,
     construct_id=f"Event{feature_name}",
     service_name=service_name,
+    feature_name=feature_name,
     maturity_level=maturity_level,
     idempotency_table=db_stack.idempotency_table,
 )

@@ -25,6 +25,7 @@ class EventStack(Stack):
             construct_id: str,
 
             service_name: str,
+            feature_name: str,
             maturity_level: str,
             idempotency_table: Table,
 
@@ -84,7 +85,7 @@ class EventStack(Stack):
         on_failure_alarm = aws_cloudwatch.Alarm(
             scope=self,
             id="OnFailureQueueAlarm",
-            alarm_name=f"[{maturity_level}][NotifyRestaurant function] Failed events detected in OnFailure destination",
+            # alarm_name=f"[{maturity_level}][NotifyRestaurant function] Failed events detected in OnFailure destination",
             metric=restaurant_notification_error_queue.metric_approximate_number_of_messages_visible(),
             comparison_operator=aws_cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
             threshold=0,
@@ -96,7 +97,7 @@ class EventStack(Stack):
         destination_delivery_alarm = aws_cloudwatch.Alarm(
             scope=self,
             id="DestinationDeliveryFailuresAlarm",
-            alarm_name=f"[{maturity_level}][NotifyRestaurant function] Failed to deliver failed events to OnFailure destination",
+            # alarm_name=f"[{maturity_level}][NotifyRestaurant function] Failed to deliver failed events to OnFailure destination",
             metric=notify_restaurant_fn.metric("DestinationDeliveryFailures"),
             comparison_operator=aws_cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
             threshold=0,
