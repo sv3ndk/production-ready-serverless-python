@@ -21,6 +21,16 @@ class DbStack(Stack):
             billing_mode=aws_dynamodb.BillingMode.PAY_PER_REQUEST
         )
 
+        self.orders = aws_dynamodb.Table(
+            scope=self,
+            id="orders",
+            partition_key=aws_dynamodb.Attribute(
+                name="id",
+                type=aws_dynamodb.AttributeType.STRING
+            ),
+            billing_mode=aws_dynamodb.BillingMode.PAY_PER_REQUEST
+        )
+
         self.idempotency_table = aws_dynamodb.Table(
             scope=self,
             id="idempotency",

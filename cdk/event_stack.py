@@ -107,6 +107,11 @@ class EventStack(Stack):
         destination_delivery_alarm.add_alarm_action(aws_cloudwatch_actions.SnsAction(alarm_topic))
 
 
+        self.user_notification_topic = aws_sns.Topic(
+            scope=self,
+            id="UserNotificationTopic",
+        )
+
         CfnOutput(
             scope=self,
             id="EventBusArn",

@@ -3,6 +3,7 @@ import aws_cdk as cdk
 import os
 
 from api_stack import ApiStack
+from order_flow_stack import OrderFlowStack
 from db_stack import DbStack
 from cognito_stack import CognitoStack
 from event_stack import EventStack
@@ -34,6 +35,15 @@ event_stack = EventStack(
     feature_name=feature_name,
     maturity_level=maturity_level,
     idempotency_table=db_stack.idempotency_table,
+)
+
+order_flow_stack = OrderFlowStack(
+    app,
+    construct_id=f"OrderFlow{feature_name}",
+    orders_table=db_stack.table,
+    event_bus=event_stack.event_bus,
+    restaurant_notification_topic=event_stack.restaurant_notification_topic,
+    user_notification_topic=event_stack.user_notification_topic,
 )
 
 ApiStack(
