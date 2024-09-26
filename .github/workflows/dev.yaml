@@ -49,7 +49,10 @@ jobs:
 
       - name: deploy stage gha to dev
         run: |
-          # (only needed once) cdk bootstrap
+          # only needed once: 
+          # cdk bootstrap
+
+          # normally unnecessary, unless some previous execution left the stack in place
           cdk destroy --all --force
           cdk deploy --all --require-approval never
 
@@ -76,3 +79,7 @@ jobs:
             -s \
             -v \
             --gherkin-terminal-reporter -v
+
+      - name: un-deploy gha
+        run: |
+          cdk destroy --all --force

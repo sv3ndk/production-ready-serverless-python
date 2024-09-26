@@ -60,8 +60,11 @@ where:
 * `SERVICE_NAME` is the name of the service, e.g. `production-ready-serverless`
 * `MATURITY_LEVEL` is linked to the release life cycle, e.g. `dev`, `test`, `acc`, `prod`
 
+Note that the `FEATURE_NAME`, used in the deployed stack name, is _not_ part of the SSM parameter path.
+
 Those parameters are expected to be created before the deployment and their value is shared across all deployments 
-having the same maturity level. This allows to share contextual information, like the URL of 3rd API,...
+having the same maturity level (each with a different feature name). 
+This allows to share contextual information, like the URL of 3rd API,...
 
 For dynamic configuration that should not be shared across deployments, e.g. feature flags,  we could use a 
 convention similar to the following instead:
@@ -109,8 +112,6 @@ Both the integration and end-to-end tests require resources to already be presen
 The database should also have been seeded with the script above to match exactly the test expectations 
 (TODO: automate this step).
 
-The `STAGE_NAME` environment variable is used to retrieve those resources details when running the tests.
-
 Executing the tests requires to be authenticated with AWS.
 
 Create a virtualenv with the required dependencies
@@ -122,7 +123,8 @@ pip install -r tests/requirements.txt
 
 ## Integration tests
 
-Integration tests are invoking the lambdas handlers directly, relying on resources present in the AWS account. 
+Integration tests are invoking the lambdas handlers directly. 
+The `MATURITY_LEVEL` and `FEATURE_NAME` environment variables are used to retrieve AWS resources details.
  
 ```sh
 MATURITY_LEVEL=dev \
