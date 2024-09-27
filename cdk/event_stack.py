@@ -3,11 +3,11 @@ from aws_cdk import (
     aws_events,
     aws_sqs,
     aws_sns,
-    aws_lambda_python_alpha,
     Duration,
     aws_lambda,
     aws_cloudwatch,
     aws_cloudwatch_actions,
+    aws_lambda_python_alpha,
     aws_events_targets,
     CfnOutput
 )
@@ -15,6 +15,8 @@ from aws_cdk.aws_dynamodb import Table
 from aws_cdk.aws_events import EventPattern
 from aws_cdk.aws_lambda_destinations import SqsDestination
 from constructs import Construct
+
+import svend_l3
 
 
 class EventStack(Stack):
@@ -49,23 +51,25 @@ class EventStack(Stack):
             id="AlarmTopic"
         )
 
-        notify_restaurant_fn = aws_lambda_python_alpha.PythonFunction(
+        notify_restaurant_fn = svend_l3.traced_python_function(
             scope=self,
             id="notify_restaurant",
-            entry="src/functions/notify_restaurant",
-            index="notify_restaurant.py",
-            handler="handler",
-            # CDK automatically grants the necessary IAM permissions to deliver failed messages to the error queue
-            on_failure=SqsDestination(queue=restaurant_notification_error_queue),
-            timeout=Duration.seconds(5),
-            runtime=aws_lambda.Runtime.PYTHON_3_12,
-            environment={
-                "POWERTOOLS_SERVICE_NAME": service_name,
-                "MATURITY_LEVEL": maturity_level,
-                "EVENT_BUS_NAME": self.event_bus.event_bus_name,
-                "TOPIC_ARN": self.restaurant_notification_topic.topic_arn,
-                "IDEMPOTENCY_TABLE_NAME": idempotency_table.table_name
-            }
+            props=aws_lambda_python_alpha.PythonFunctionProps(
+                entry="src/functions/notify_restaurant",
+                index="notify_restaurant.py",
+                handler="handler",
+                # CDK automatically grants the necessary IAM permissions to deliver failed messages to the error queue
+                on_failure=SqsDestination(queue=restaurant_notification_error_queue),
+                timeout=Duration.seconds(5),
+                runtime=aws_lambda.Runtime.PYTHON_3_12,
+                environment={
+                    "POWERTOOLS_SERVICE_NAME": service_name,
+                    "MATURITY_LEVEL": maturity_level,
+                    "EVENT_BUS_NAME": self.event_bus.event_bus_name,
+                    "TOPIC_ARN": self.restaurant_notification_topic.topic_arn,
+                    "IDEMPOTENCY_TABLE_NAME": idempotency_table.table_name
+                }
+            )
         )
         self.event_bus.grant_put_events_to(notify_restaurant_fn)
         self.restaurant_notification_topic.grant_publish(notify_restaurant_fn)

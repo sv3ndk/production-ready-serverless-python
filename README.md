@@ -6,7 +6,7 @@ course.
 
 # Overview
 
-Status: Week 3 completed
+Status: Week 4 in progress
 
 * CDK deployment: [cdk/app.py](cdk/app.py)
 

@@ -9,6 +9,12 @@ from aws_lambda_powertools.logging import Logger
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from pydantic import BaseModel
 
+from aws_xray_sdk.core import patch_all
+
+# patch all boto3 clients to also include x-ray tracing
+patch_all()
+
+
 logger = Logger(log_uncaught_exceptions=True)
 web_app = APIGatewayRestResolver(enable_validation=True)
 
@@ -27,7 +33,6 @@ if not MATURITY_LEVEL:
 dynamo_client = boto3.client('dynamodb')
 dynamo_resource = boto3.resource('dynamodb')
 restaurant_table_client = dynamo_resource.Table(TABLE_NAME)
-
 
 def search_restaurants(theme: str, result_limit: int) -> list[dict]:
     response = restaurant_table_client.scan(

@@ -4,6 +4,12 @@ import json
 import boto3
 from pydantic import BaseModel
 
+from aws_xray_sdk.core import patch_all
+
+# patch boto3 client to also include x-ray tracing
+patch_all()
+
+
 class Order(BaseModel):
     restaurantName: str
 

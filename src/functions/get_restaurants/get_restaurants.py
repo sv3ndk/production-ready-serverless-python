@@ -8,6 +8,13 @@ from aws_lambda_powertools.utilities import parameters
 from aws_lambda_powertools.logging import Logger
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
+
+from aws_xray_sdk.core import patch_all
+
+# patch all boto3 clients to also include x-ray tracing
+patch_all()
+
+
 logger = Logger(log_uncaught_exceptions=True)
 web_app = APIGatewayRestResolver(enable_validation=True)
 

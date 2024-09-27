@@ -4,6 +4,12 @@ from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 
 from place_order_logic import Order, do_place_order
 
+from aws_xray_sdk.core import patch_all
+
+# patch all boto3 clients to also include x-ray tracing
+patch_all()
+
+
 web_app = APIGatewayRestResolver(enable_validation=True)
 
 bus_name = os.getenv("EVENT_BUS_NAME")

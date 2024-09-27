@@ -10,8 +10,16 @@ from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from requests_aws4auth import AWS4Auth
 from aws_lambda_powertools.logging import Logger
+from aws_lambda_powertools.tracing import Tracer
+
+from aws_xray_sdk.core import patch_all
+
+# patch all boto3 clients to also include x-ray tracing
+patch_all()
+
 
 logger = Logger(log_uncaught_exceptions=True)
+tracer = Tracer()
 web_app = APIGatewayRestResolver(enable_validation=True)
 
 
@@ -48,6 +56,7 @@ def all_restaurants() -> list[dict]:
     return response.json()
 
 
+@tracer.capture_lambda_handler
 @web_app.get("/")
 def get_index():
     restaurants = all_restaurants()

@@ -5,6 +5,12 @@ from aws_lambda_powertools.logging import Logger
 from aws_lambda_powertools.utilities.data_classes import event_source, EventBridgeEvent
 from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer, idempotent, IdempotencyConfig
 
+from aws_xray_sdk.core import patch_all
+
+# patch all boto3 clients to also include x-ray tracing
+patch_all()
+
+
 logger = Logger(log_uncaught_exceptions=True)
 
 bus_name = os.getenv("EVENT_BUS_NAME")

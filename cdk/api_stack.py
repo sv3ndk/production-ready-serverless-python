@@ -4,8 +4,8 @@ from aws_cdk import (
     aws_cognito,
     aws_lambda,
     aws_apigateway,
-    aws_lambda_python_alpha,
     aws_events,
+    aws_lambda_python_alpha,
     CfnOutput,
     Duration
 )
@@ -13,6 +13,8 @@ from aws_cdk.aws_apigateway import StageOptions
 from aws_cdk.aws_dynamodb import Table
 from aws_cdk.aws_iam import PolicyStatement, Effect
 from aws_cdk.aws_ssm import StringParameter
+
+import svend_l3
 
 from constructs import Construct
 
@@ -39,7 +41,8 @@ class ApiStack(Stack):
             scope=self,
             id=f"api{feature_name}",
             deploy_options=StageOptions(
-                stage_name=feature_name
+                stage_name=feature_name,
+                tracing_enabled=True
             )
         )
 
@@ -63,20 +66,23 @@ class ApiStack(Stack):
         # GET /restaurants
         # internal API: protected by IAM
 
-        get_restaurants_fn = aws_lambda_python_alpha.PythonFunction(
+        get_restaurants_fn = svend_l3.traced_python_function(
             scope=self,
             id="get_restaurants",
-            entry="src/functions/get_restaurants",
-            index="get_restaurants.py",
-            handler="handler",
-            timeout=Duration.seconds(15),
-            runtime=aws_lambda.Runtime.PYTHON_3_12,
-            environment={
-                "POWERTOOLS_SERVICE_NAME": service_name,
-                "MATURITY_LEVEL": maturity_level,
-                "TABLE_NAME": restaurants_table.table_name,
-            }
+            props=aws_lambda_python_alpha.PythonFunctionProps(
+                entry="src/functions/get_restaurants",
+                index="get_restaurants.py",
+                handler="handler",
+                timeout=Duration.seconds(15),
+                runtime=aws_lambda.Runtime.PYTHON_3_12,
+                environment={
+                    "POWERTOOLS_SERVICE_NAME": service_name,
+                    "MATURITY_LEVEL": maturity_level,
+                    "TABLE_NAME": restaurants_table.table_name,
+                }
+            )
         )
+
         restaurants_table.grant_read_data(get_restaurants_fn)
         get_restaurants_fn.role.add_to_principal_policy(
             PolicyStatement(
@@ -97,19 +103,21 @@ class ApiStack(Stack):
         # POST /restaurants/search
         # external API: protected by Cognito
 
-        search_restaurants_fn = aws_lambda_python_alpha.PythonFunction(
+        search_restaurants_fn = svend_l3.traced_python_function(
             scope=self,
             id="search_restaurants",
-            entry="src/functions/search_restaurants",
-            index="search_restaurants.py",
-            handler="handler",
-            timeout=Duration.seconds(15),
-            runtime=aws_lambda.Runtime.PYTHON_3_12,
-            environment={
-                "POWERTOOLS_SERVICE_NAME": service_name,
-                "MATURITY_LEVEL": maturity_level,
-                "TABLE_NAME": restaurants_table.table_name,
-            }
+            props=aws_lambda_python_alpha.PythonFunctionProps(
+                entry="src/functions/search_restaurants",
+                index="search_restaurants.py",
+                handler="handler",
+                timeout=Duration.seconds(15),
+                runtime=aws_lambda.Runtime.PYTHON_3_12,
+                environment={
+                    "POWERTOOLS_SERVICE_NAME": service_name,
+                    "MATURITY_LEVEL": maturity_level,
+                    "TABLE_NAME": restaurants_table.table_name,
+                }
+            )
         )
         search_restaurants_fn.role.add_to_principal_policy(
             PolicyStatement(
@@ -132,23 +140,25 @@ class ApiStack(Stack):
         # GET /
         # may access the internal API (via HTTP and signed requests with signature v4)
 
-        get_index_fn = aws_lambda_python_alpha.PythonFunction(
+        get_index_fn = svend_l3.traced_python_function(
             scope=self,
             id="get_index",
-            entry="src/functions/get_index",
-            index="get_index.py",
-            handler="handler",
-            timeout=Duration.seconds(15),
-            runtime=aws_lambda.Runtime.PYTHON_3_12,
-            environment={
-                "POWERTOOLS_SERVICE_NAME": service_name,
-                # we can't use the API Gateway resource here to know the URL because it would create a circular dependency
-                # "RESTAURANTS_API_URL": Fn.sub(f"https://${{{api_logical_id}}}.execute-api.${{AWS::Region}}.amazonaws.com/{stage_name}/restaurants"),
-                "RESTAURANTS_API_URL": api_url("/restaurants"),
-                "ORDER_API_URL": api_url("/orders"),
-                "COGNITO_USER_POOL_ID": cognito_user_pool.user_pool_id,
-                "COGNITO_CLIENT_ID": cognito_web_user_pool_client.user_pool_client_id
-            }
+            props=aws_lambda_python_alpha.PythonFunctionProps(
+                entry="src/functions/get_index",
+                index="get_index.py",
+                handler="handler",
+                timeout=Duration.seconds(15),
+                runtime=aws_lambda.Runtime.PYTHON_3_12,
+                environment={
+                    "POWERTOOLS_SERVICE_NAME": service_name,
+                    # we can't use the API Gateway resource here to know the URL because it would create a circular dependency
+                    # "RESTAURANTS_API_URL": Fn.sub(f"https://${{{api_logical_id}}}.execute-api.${{AWS::Region}}.amazonaws.com/{stage_name}/restaurants"),
+                    "RESTAURANTS_API_URL": api_url("/restaurants"),
+                    "ORDER_API_URL": api_url("/orders"),
+                    "COGNITO_USER_POOL_ID": cognito_user_pool.user_pool_id,
+                    "COGNITO_CLIENT_ID": cognito_web_user_pool_client.user_pool_client_id
+                }
+            )
         )
         get_index_fn.role.add_to_principal_policy(
             PolicyStatement(
@@ -167,19 +177,21 @@ class ApiStack(Stack):
         # ------
         # POST /orders
 
-        place_order_fn = aws_lambda_python_alpha.PythonFunction(
+        place_order_fn = svend_l3.traced_python_function(
             scope=self,
             id="place_order",
-            entry="src/functions/place_order",
-            index="place_order.py",
-            handler="handler",
-            timeout=Duration.seconds(5),
-            runtime=aws_lambda.Runtime.PYTHON_3_12,
-            environment={
-                "POWERTOOLS_SERVICE_NAME": service_name,
-                "MATURITY_LEVEL": maturity_level,
-                "EVENT_BUS_NAME": event_bus.event_bus_name,
-            }
+            props=aws_lambda_python_alpha.PythonFunctionProps(
+                entry="src/functions/place_order",
+                index="place_order.py",
+                handler="handler",
+                timeout=Duration.seconds(5),
+                runtime=aws_lambda.Runtime.PYTHON_3_12,
+                environment={
+                    "POWERTOOLS_SERVICE_NAME": service_name,
+                    "MATURITY_LEVEL": maturity_level,
+                    "EVENT_BUS_NAME": event_bus.event_bus_name,
+                }
+            )
         )
         event_bus.grant_put_events_to(place_order_fn)
         api.root.add_resource('orders').add_method(
