@@ -6,8 +6,6 @@ course.
 
 # Overview
 
-Status: Week 4 in progress
-
 * CDK deployment: [cdk/app.py](cdk/app.py)
 
 * REST API:
